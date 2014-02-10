@@ -1,0 +1,54 @@
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/libs-milestone" }
+        mavenLocal()
+    }
+}
+
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+// apply plugin: 'idea'
+// apply plugin: 'spring-boot'
+
+
+sourceCompatibility = 1.6
+version = '0.1.0'
+jar {
+    baseName = 'dbbenchmark-prototype'
+    version =  '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/libs-milestone" }
+}
+
+dependencies {
+
+    compile 'org.mongodb:mongo-java-driver:2.11.2'
+    compile 'mysql:mysql-connector-java:5.1.25'
+    compile 'commons-logging:commons-logging:1.1.1'
+    compile 'org.springframework:spring-core:3.2.3.RELEASE'
+    compile 'org.springframework:spring-web:3.2.3.RELEASE'
+    compile 'org.springframework:spring-webmvc:3.2.3.RELEASE'
+    
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.10'
+}
+
+test {
+    systemProperties 'property': 'value'
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
+

@@ -1,5 +1,21 @@
-*.class
+.classpath
+.project
+.directory
+.svn
+.settings
+.metadata
+target
+build.sh~
+.gitignore~
+.gradle
+bin
+build
+.DS_Store
+.gradletasknamecache
+.groovy
+gradle-app.setting
 
+*.class
 # Package Files #
 *.jar
 *.war
