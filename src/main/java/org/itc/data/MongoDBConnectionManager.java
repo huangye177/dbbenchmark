@@ -1,4 +1,4 @@
-package com.itc;
+package org.itc.data;
 
 import java.net.UnknownHostException;
 

@@ -1,6 +1,10 @@
-package com.itc;
+package org.itc.scenario;
 
 import java.io.File;
+
+import org.itc.data.IStorageManager;
+import org.itc.data.MongoDBManager;
+import org.itc.data.MySQLManager;
 
 public abstract class IObserver
 {
@@ -32,7 +36,6 @@ public abstract class IObserver
         }
     }
 
-    @SuppressWarnings("restriction")
     public String checkCPUInfo()
     {
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
@@ -41,7 +44,6 @@ public abstract class IObserver
                 "; System avg load: " + os.getSystemLoadAverage() + "; ";
     }
 
-    @SuppressWarnings("restriction")
     public String checkRAMInfo()
     {
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)

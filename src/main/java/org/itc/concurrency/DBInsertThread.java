@@ -1,6 +1,7 @@
-package com.itc;
+package org.itc.concurrency;
 
 import org.apache.commons.logging.LogFactory;
+import org.itc.data.StorageCRUDThread;
 
 public class DBInsertThread extends StorageCRUDThread
 {

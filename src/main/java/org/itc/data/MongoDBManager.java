@@ -1,4 +1,4 @@
-package com.itc;
+package org.itc.data;
 
 import java.util.Date;
 import java.util.HashMap;

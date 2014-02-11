@@ -1,0 +1,56 @@
+{
+    "scenarioUnits" : [
+        {
+            "timeZone": "CET",
+            "batchMode": false,
+            "numOfInsertThread": 1,
+            "numOfQueryThread": 1,
+            "numberOfSelections": 1000, 
+            "dataSetSizeList" : 10000,
+            "databaseDriver": "com.mysql.jdbc.Driver",
+            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",
+            "databaseUsername": "iristestdb",
+            "databasePassword": "iristestdb",
+            "enableDBCreate": true,
+            "enableDBInsert": true,
+            "enableDBQuery":true,
+            "enableDBDeletion": true,
+            "scenarioStatement" : [
+            	{
+            		"type": "insert",
+            		"content": "insert into"
+            	},
+            	{
+            		"type": "select",
+            		"content": "select from"
+            	}
+            ]
+        }, 
+        {
+            "timeZone": "CET",
+            "batchMode": false,
+            "numOfInsertThread": 1,
+            "numOfQueryThread": 1,
+            "numberOfSelections": 1000, 
+            "dataSetSizeList" : 10000,
+            "databaseDriver": "com.mysql.jdbc.Driver",
+            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",
+            "databaseUsername": "iristestdb",
+            "databasePassword": "iristestdb",
+            "enableDBCreate": true,
+            "enableDBInsert": true,
+            "enableDBQuery":true,
+            "enableDBDeletion": true,
+            "scenarioStatement" : [
+            	{
+            		"type": "insert",
+            		"content": "insert into"
+            	},
+            	{
+            		"type": "select",
+            		"content": "select from"
+            	}
+            ]
+        }
+    ]
+}

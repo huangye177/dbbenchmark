@@ -1,10 +1,12 @@
-package com.itc;
+package org.itc.data;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
+
+import org.itc.scenario.IObserver;
 
 public abstract class IStorageManager
 {

@@ -1,37 +1,59 @@
 buildscript {
     repositories {
-        maven { url "http://repo.spring.io/libs-milestone" }
-        mavenLocal()
+        mavenCentral()
     }
-}
-
-
-apply plugin: 'java'
-apply plugin: 'eclipse'
-// apply plugin: 'idea'
-// apply plugin: 'spring-boot'
-
-
-sourceCompatibility = 1.6
-version = '0.1.0'
-jar {
-    baseName = 'dbbenchmark-prototype'
-    version =  '0.1.0'
+    
+    dependencies {
+        classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
+    }
 }
 
 repositories {
     mavenCentral()
-    maven { url "http://repo.spring.io/libs-milestone" }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+apply plugin: 'fatjar'
+
+group='org.itc'
+mainClassName = "org.itc.Trunk"
+
+sourceCompatibility = 1.6
+version = '0.1.0'
+
+fatJar {
+    manifest {
+        attributes 'Main-Class': 'org.itc.Trunk'
+    }
+
+    // exclude signature files from the fat JAR, otherwise get invalid signature file digest errors.
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+    
+    // copy the default application execution workflow config file 
+    // to support the execution of the generated jar file
+    doLast {
+        copysettingconfig.execute()
+    }
 }
 
 dependencies {
 
+    compile 'org.projectlombok:lombok:1.12.2'
+    
     compile 'org.mongodb:mongo-java-driver:2.11.2'
     compile 'mysql:mysql-connector-java:5.1.25'
     compile 'commons-logging:commons-logging:1.1.1'
-    compile 'org.springframework:spring-core:3.2.3.RELEASE'
-    compile 'org.springframework:spring-web:3.2.3.RELEASE'
-    compile 'org.springframework:spring-webmvc:3.2.3.RELEASE'
+    
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.3.0'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.3.0'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.3.0'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.3.0'
+    
+//    compile 'org.springframework:spring-core:3.2.3.RELEASE'
+//    compile 'org.springframework:spring-web:3.2.3.RELEASE'
+//    compile 'org.springframework:spring-webmvc:3.2.3.RELEASE'
     
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
@@ -40,15 +62,9 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.10'
 }
 
-test {
-    systemProperties 'property': 'value'
+tasks.create(name: 'copysettingconfig', type: Copy) {
+    from(file('scenariosetting.json'))
+    into('build/libs')
 }
 
-uploadArchives {
-    repositories {
-       flatDir {
-           dirs 'repos'
-       }
-    }
-}
 

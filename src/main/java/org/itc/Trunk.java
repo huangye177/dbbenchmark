@@ -1,4 +1,4 @@
-package com.itc;
+package org.itc;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -7,11 +7,29 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.logging.Logger;
 
-public class ScenarioTrunk
+import org.itc.concurrency.DBInsertThread;
+import org.itc.concurrency.DBQueryThread;
+import org.itc.data.IStorageManager;
+import org.itc.data.MongoDBManager;
+import org.itc.data.MySQLManager;
+import org.itc.data.StorageCRUDThread;
+import org.itc.scenario.IObserver;
+import org.itc.scenario.JSONSettingReaderWriter;
+import org.itc.scenario.Scenarios;
+import org.itc.scenario.StaticObserver;
+import org.itc.scenario.TraceObserver;
+
+public class Trunk
 {
+    private static final Logger LOGGER = Logger.getLogger("Trunk");
+
     private IObserver traceObserver = new TraceObserver();
     private IObserver staticObserver = new StaticObserver();
+
+    /** imported simulation scenarios from external setting file */
+    private Scenarios scenarios = null;
 
     List<StorageCRUDThread> dbInsertThread = null;
     List<StorageCRUDThread> dbQueryThread = null;
@@ -20,8 +38,13 @@ public class ScenarioTrunk
 
     Date today = new Date();
 
-    public ScenarioTrunk()
+    public Trunk()
     {
+        LOGGER.info("Hello, Gradle Application!");
+        this.scenarios = JSONSettingReaderWriter.launchScenarioSetting();
+
+        System.exit(0);
+
         this.dateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
         this.dbInsertThread = new ArrayList<StorageCRUDThread>();
         this.dbQueryThread = new ArrayList<StorageCRUDThread>();
@@ -29,11 +52,11 @@ public class ScenarioTrunk
 
     public static void main(String[] args)
     {
-        ScenarioTrunk scenarios = new ScenarioTrunk();
-        scenarios.getTraceObserver().clearsysLog();
-        scenarios.getStaticObserver().clearsysLog();
+        Trunk scenarioTrunk = new Trunk();
+        scenarioTrunk.getTraceObserver().clearsysLog();
+        scenarioTrunk.getStaticObserver().clearsysLog();
 
-        scenarios.runScenarios();
+        scenarioTrunk.runScenarios();
     }
 
     public void runScenarios()
@@ -68,9 +91,9 @@ public class ScenarioTrunk
         // boolean[] isSelectionWithIndexList = new boolean[] { false, true };
         long[] dataSetSizeList = new long[] {
                 10000 // TEST, 10K records
-        // 3000000, // BENCHMARK, 3m records
-        // 30000000, // 30m records
-        // 60000000 // 60m records, est. MAX ADELE before 09.13
+                // 3000000, // BENCHMARK, 3m records
+                // 30000000, // 30m records
+                // 60000000 // 60m records, est. MAX ADELE before 09.13
                 // 100000000 // 100m records
         };
 

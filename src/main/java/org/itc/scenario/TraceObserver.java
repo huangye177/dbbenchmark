@@ -1,4 +1,4 @@
-package com.itc;
+package org.itc.scenario;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -7,12 +7,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-public class StaticObserver extends IObserver
+public class TraceObserver extends IObserver
 {
-    public StaticObserver()
+
+    public TraceObserver()
     {
         super();
-        logFilePath = System.getProperty("user.dir") + "/staticlog.txt";
+        logFilePath = "./tracelog.txt";
 
         this.initLogFile();
     }
@@ -21,11 +22,12 @@ public class StaticObserver extends IObserver
     public void update(String msg, double value)
     {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+        // TODO refactoring
         formatter.setTimeZone(TimeZone.getTimeZone("CET"));
 
         String timeStamp = formatter.format(Calendar.getInstance().getTime());
-
-        String infoLine = "" + timeStamp + " \n " + msg + " | " + value;
+        String infoLine = "" + timeStamp + " | " + msg + " | " + value;
         infoLine += "\n#CPU: " + this.checkCPUInfo() +
                 "; #RAM: " + this.checkRAMInfo() +
                 "; #MySQL Size: " + this.checkMysqlDBSizeInfo() +
@@ -54,7 +56,6 @@ public class StaticObserver extends IObserver
                 e.printStackTrace();
             }
         }
-
     }
 
     @Override
@@ -88,4 +89,5 @@ public class StaticObserver extends IObserver
         }
 
     }
+
 }

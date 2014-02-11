@@ -1,10 +1,12 @@
-package com.itc;
+package org.itc.data;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
+import org.itc.scenario.IObserver;
+import org.itc.scenario.TraceObserver;
 
 public class StorageCRUDThread extends Thread
 {
