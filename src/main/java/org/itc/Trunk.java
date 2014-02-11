@@ -17,6 +17,7 @@ import org.itc.data.MySQLManager;
 import org.itc.data.StorageCRUDThread;
 import org.itc.scenario.IObserver;
 import org.itc.scenario.JSONSettingReaderWriter;
+import org.itc.scenario.ScenarioUnit;
 import org.itc.scenario.Scenarios;
 import org.itc.scenario.StaticObserver;
 import org.itc.scenario.TraceObserver;
@@ -61,151 +62,77 @@ public class Trunk
 
     public void runScenarios()
     {
-        boolean enableDBCreate = true;
-        boolean enableDBInsert = true;
-        boolean enableDBQuery = true;
-        boolean enableDBDeletion = true;
-
-        /*
-         * NOTICE: "Table Sharding" and "Partition" are mutual strategy here;
-         * thus "partition > 1" only works if isTableShardingList is false
-         */
-        // boolean isTableSharding = false;
-        boolean[] isTableShardingList = { false };
-        int partition = 30;
-
-        /*
-         * NOTICE: Batch mode should run with Partition mode to given better
-         * performance with better compability
-         */
-        boolean isBatchMode = true;
-
-        // boolean[] isTableShardingList = { false, true };
-
-        int numOfInsertThread = 1;
-        int numOfQueryThread = 1;
-        int numberOfSelections = 1000; // 1k queries to get average
-        String[] dbTypeList = new String[] { "mysql" };
-        // String[] dbTypeList = new String[] { "mongodb", "mysql" };
-        boolean[] isSelectionWithIndexList = new boolean[] { true };
-        // boolean[] isSelectionWithIndexList = new boolean[] { false, true };
-        long[] dataSetSizeList = new long[] {
-                10000 // TEST, 10K records
-                // 3000000, // BENCHMARK, 3m records
-                // 30000000, // 30m records
-                // 60000000 // 60m records, est. MAX ADELE before 09.13
-                // 100000000 // 100m records
-        };
-
-        for (boolean isTableSharding : isTableShardingList)
+        for (ScenarioUnit su : scenarios.getScenarioUnits())
         {
-            for (String dbType : dbTypeList)
+            /*
+             * NOTICE: Batch mode should run with Partition mode to given better
+             * performance with better compability
+             */
+            boolean isBatchMode = su.isBatchMode();
+            boolean enableDBCreate = su.isEnableDBCreate();
+            boolean enableDBInsert = su.isEnableDBInsert();
+            boolean enableDBQuery = su.isEnableDBQuery();
+            boolean enableDBDeletion = su.isEnableDBDeletion();
+
+            int numOfInsertThread = su.getNumOfInsertThread();
+            int numOfQueryThread = su.getNumOfQueryThread();
+            // queries
+            int numberOfSelections = su.getNumberOfSelections();
+            String dbType = su.getDatabaseDriver();
+            long dataSetSize = su.getDataSetSizeList();
+
+            // create DB
+            if (enableDBCreate)
             {
-                for (int i = 0; i < dataSetSizeList.length; i++)
+                this.dbCreatScenario(dbType, dataSetSize, false, -1);
+            }
+
+            // insert tests
+            if (enableDBInsert)
+            {
+                this.dbInsertThreadLaunch(dbType, dataSetSize, numOfInsertThread,
+                        false, -1, isBatchMode);
+            }
+
+            // query DB with different query options
+            if (enableDBQuery)
+            {
+                /*
+                 * sleep for a few minutes thus machine CPU and Memory can be
+                 * recycled to free status
+                 */
+                try
                 {
-                    long currentAmountOfMeasData = dataSetSizeList[i];
-                    long lastAmountOfMeasData = -1;
-                    long nextAmountOfMeasData = -1;
+                    Thread.sleep(1000 * 60 * 1);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
 
-                    if ((i - 1) >= 0)
-                    {
-                        lastAmountOfMeasData = dataSetSizeList[i - 1];
-                    }
-                    else
-                    {
-                        lastAmountOfMeasData = -1;
-                    }
+                this.dbReadThreadLaunch(dbType, dataSetSize, numOfQueryThread, numberOfSelections, null,
+                        false, -1);
+            }
 
-                    if ((i + 1) < dataSetSizeList.length)
-                    {
-                        nextAmountOfMeasData = dataSetSizeList[i + 1];
-                    }
-                    else
-                    {
-                        nextAmountOfMeasData = -1;
-                    }
+            // delete data
+            if (enableDBDeletion)
+            {
+                this.dbDeleteScenario(dbType, dataSetSize, false, -1);
 
-                    if (lastAmountOfMeasData != currentAmountOfMeasData)
-                    {
-                        if (enableDBCreate)
-                        {
-                            /*
-                             * create DB
-                             */
-                            this.dbCreatScenario(dbType, currentAmountOfMeasData, isTableSharding, partition);
-                        }
-
-                        if (enableDBInsert)
-                        {
-                            // insert tests
-                            this.dbInsertThreadLaunch(dbType, currentAmountOfMeasData, numOfInsertThread,
-                                    isTableSharding, partition, isBatchMode);
-                        }
-                    }
-                    else
-                    {
-                        /*
-                         * the same db type with same size was already created
-                         * last time, thus no need to create a new data set for
-                         * the same data storage type
-                         */
-                    }
-
-                    /*
-                     * query DB with different query options
-                     */
-                    if (enableDBQuery)
-                    {
-                        /*
-                         * sleep for a few minutes thus machine CPU and Memory
-                         * can be recycled to free status
-                         */
-                        try
-                        {
-                            Thread.sleep(1000 * 60 * 3);
-                        }
-                        catch (InterruptedException e)
-                        {
-                            e.printStackTrace();
-                        }
-
-                        this.dbReadThreadLaunch(dbType, currentAmountOfMeasData, numOfQueryThread, numberOfSelections, isSelectionWithIndexList,
-                                isTableSharding, partition);
-                    }
-
-                    // delete data
-                    if (nextAmountOfMeasData != currentAmountOfMeasData)
-                    {
-                        if (enableDBDeletion)
-                        {
-                            this.dbDeleteScenario(dbType, currentAmountOfMeasData, isTableSharding, partition);
-
-                            /*
-                             * sleep for a few minutes thus machine CPU and
-                             * Memory can be recycled to free status
-                             */
-                            try
-                            {
-                                Thread.sleep(1000 * 60 * 5);
-                            }
-                            catch (InterruptedException e)
-                            {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        /*
-                         * do NOT delete the DB because it can be re-used by the
-                         * next query scenario
-                         */
-                    }
-
+                /*
+                 * sleep for a few minutes thus machine CPU and Memory can be
+                 * recycled to free status
+                 */
+                try
+                {
+                    Thread.sleep(1000 * 60 * 1);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
                 }
             }
         }
-
     }
 
     /**
@@ -499,5 +426,15 @@ public class Trunk
     public IObserver getStaticObserver()
     {
         return staticObserver;
+    }
+
+    public Scenarios getScenarios()
+    {
+        return scenarios;
+    }
+
+    public void setScenarios(Scenarios scenarios)
+    {
+        this.scenarios = scenarios;
     }
 }
