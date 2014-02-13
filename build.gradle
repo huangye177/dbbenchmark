@@ -29,12 +29,11 @@ fatJar {
     }
 
     // exclude signature files from the fat JAR, otherwise get invalid signature file digest errors.
-    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
     
     // copy the default application execution workflow config file 
     // to support the execution of the generated jar file
     doLast {
-        copysettingconfig.execute()
+        copyTask.execute()
     }
 }
 
@@ -62,7 +61,7 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.10'
 }
 
-tasks.create(name: 'copysettingconfig', type: Copy) {
+task copyTask(type: Copy) {
     from(file('scenariosetting.json'))
     into('build/libs')
 }
