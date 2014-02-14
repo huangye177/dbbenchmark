@@ -285,25 +285,19 @@ public class MongoDBManager extends IStorageManager
 	}
 
 	@Override
-	public void execInsertOperation(String content, int repeation) {
+	public void execInsertOperation(String content) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void execSelectOperation(String content, int repeation) {
+	public void execSelectOperation(String content) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void execDeleteOperation(String content) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void execDropOperation(String content) {
 		// TODO Auto-generated method stub
 		
 	}

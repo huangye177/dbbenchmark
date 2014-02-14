@@ -60,13 +60,11 @@ public abstract class IStorageManager
     
     public abstract void execCreateOperation(String content);
     
-    public abstract void execInsertOperation(String content, int repeation);
+    public abstract void execInsertOperation(String content);
     
-    public abstract void execSelectOperation(String content, int repeation);
+    public abstract void execSelectOperation(String content);
     
     public abstract void execDeleteOperation(String content);
-    
-    public abstract void execDropOperation(String content);
 
     public void registerObserver(IObserver observer)
     {

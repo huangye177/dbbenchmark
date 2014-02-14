@@ -26,24 +26,11 @@ public class MySQLManager extends IStorageManager
 
     }
 
-    public MySQLManager(long amount_of_records, boolean isTableSharding, int partition)
-    {
-        super();
-        this.amount_of_records = amount_of_records;
-        this.partition = partition;
-
-        if (partition < 1)
-        {
-            System.out.println("The Data partition must be bigger than 1");
-            System.exit(0);
-        }
-    }
-
     @Override
     public void initConnection(String connString, String username, String password)
     {
         this.conn = MySQLConnectionManager.getDBConnection(connString, username, password);
-        // this.printDBMetaInfo();
+        this.printDBMetaInfo();
     }
 
     @Override
@@ -53,6 +40,7 @@ public class MySQLManager extends IStorageManager
     }
 
     @Override
+    @Deprecated
     public void createMeasurementTable()
     {
         // System.out.println("CREATING MySQL Tables...");
@@ -193,6 +181,7 @@ public class MySQLManager extends IStorageManager
     }
 
     @Override
+    @Deprecated
     public void insertMeasurements()
     {
         for (int i = 0; i < this.amount_of_records; i++)
@@ -207,12 +196,13 @@ public class MySQLManager extends IStorageManager
      * mode
      */
     @Override
+    @Deprecated
     public void insertMeasurementsInBatch()
     {
         /*
          * initialize to-execute insert statements grouped by dataseries Id
          */
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         HashMap<Integer, List<String>> toExecuteInsertStatments = new HashMap<Integer, List<String>>();
         int batchCommitsize = 10000;
@@ -291,6 +281,7 @@ public class MySQLManager extends IStorageManager
     }
 
     @Override
+    @Deprecated
     public long[] selectMeasurementByDataSeriesId()
     {
         long queryTime = System.currentTimeMillis();
@@ -419,6 +410,7 @@ public class MySQLManager extends IStorageManager
     }
 
     @Override
+    @Deprecated
     public void dropMeasurementTable()
     {
         List<String> deleteStrList = new ArrayList<String>();
@@ -462,7 +454,6 @@ public class MySQLManager extends IStorageManager
 
     private void printDBMetaInfo()
     {
-
         try
         {
             DatabaseMetaData dbmd = this.conn.getMetaData();
@@ -787,32 +778,132 @@ public class MySQLManager extends IStorageManager
 
 	@Override
 	public void execCreateOperation(String content) {
-		// TODO Auto-generated method stub
 		
+		Statement stmt = null;
+
+        try
+        {
+            stmt = this.conn.createStatement();
+
+            stmt.executeUpdate(content);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            // finally block used to close resources
+            try
+            {
+                stmt.close();
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+        }
 	}
 
 	@Override
-	public void execInsertOperation(String content, int repeation) {
-		// TODO Auto-generated method stub
+	public void execInsertOperation(String content) {
 		
+		PreparedStatement preparedStatement = null;
+
+        try
+        {
+            preparedStatement = this.conn.prepareStatement(content);
+            
+
+            preparedStatement.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            // finally block used to close resources
+            try
+            {
+                preparedStatement.close();
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+        }
 	}
 
 	@Override
-	public void execSelectOperation(String content, int repeation) {
-		// TODO Auto-generated method stub
+	public void execSelectOperation(String content) {
 		
+		PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+
+        try
+        {
+            preparedStatement = this.conn.prepareStatement(content);
+
+            /*
+             * Set query cursor
+             */
+            preparedStatement.setFetchSize(100);
+
+            rs = preparedStatement.executeQuery();
+
+            while (rs.next())
+            {
+                rs.toString();
+            }
+            this.notifyObservers();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            // finally block used to close resources
+            try
+            {
+                rs.close();
+                preparedStatement.close();
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+        }
 	}
 
 	@Override
 	public void execDeleteOperation(String content) {
-		// TODO Auto-generated method stub
 		
-	}
+		Statement stmt = null;
 
-	@Override
-	public void execDropOperation(String content) {
-		// TODO Auto-generated method stub
-		
+        try
+        {
+            stmt = this.conn.createStatement();
+
+            stmt.executeUpdate(content);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            // finally block used to close resources
+            try
+            {
+                stmt.close();
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+        }
 	}
 
 }

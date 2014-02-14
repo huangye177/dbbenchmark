@@ -9,7 +9,6 @@ import lombok.Data;
 public class ScenarioUnit
 {
     private String timeZone = "CET";
-    private boolean batchMode = false;
 
     private int numOfInsertThread = 1;
     private int numOfQueryThread = 1;

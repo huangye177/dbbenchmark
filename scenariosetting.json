@@ -2,7 +2,47 @@
     "scenarioUnits" : [
         {
             "timeZone": "CET",
-            "batchMode": false,
+            "numOfInsertThread": 1,
+            "numOfQueryThread": 1,
+            "dbtype": "MYSQL"
+            "databaseDriver": "com.mysql.jdbc.Driver",
+            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",
+            "databaseUsername": "iristestdb",
+            "databasePassword": "iristestdb",
+            "enableDBCreate": true,
+            "enableDBInsert": false,
+            "enableDBQuery":false,
+            "enableDBDeletion": false,
+            "scenarioStatement" : [
+            	{
+            		"operationtype": "CREATE",
+            		"repeat": 1,
+            		"interoperate": NULL,
+            		"content": "
+					    CREATE TABLE `gm_std_measurements` (
+					    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+					    `project_id` int(11) DEFAULT NULL,
+					    `fkDataSeriesId` bigint(20) DEFAULT NULL,
+					    `measDateUtc` datetime DEFAULT NULL,
+					    `measDateSite` datetime DEFAULT NULL,
+					    `measvalue` double DEFAULT NULL,
+					    `refMeas` bit(1) DEFAULT NULL,
+					    `reliability` double DEFAULT NULL,
+					    PRIMARY KEY (`id`),
+					    KEY `Index2` (`fkDataSeriesId`,`measDateUtc`)
+					    ) ENGINE=MyISAM DEFAULT CHARSET=utf8 
+					"
+            	},
+            	{
+            		"operationtype": "DELETE",
+            		"repeat": 1,
+            		"interoperate": NULL,
+            		"content": "DROP TABLE `gm_std_measurements`;"
+            	}
+            ]
+        },
+        {
+            "timeZone": "CET",
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "dbtype": "MYSQL"
@@ -74,35 +114,6 @@
             		"repeat": 1,
             		"interoperate": NULL,
             		"content": "DROP TABLE gm_std_measurements;"
-            	}
-            ]
-        }, 
-        {
-            "timeZone": "CET",
-            "batchMode": false,
-            "numOfInsertThread": 1,
-            "numOfQueryThread": 1,
-            "numberOfSelections": 1000, 
-            "dataSetSizeList" : 10000,
-            "dbtype": "MYSQL"
-            "databaseDriver": "com.mysql.jdbc.Driver",
-            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",
-            "databaseUsername": "iristestdb",
-            "databasePassword": "iristestdb",
-            "enableDBCreate": true,
-            "enableDBInsert": true,
-            "enableDBQuery":true,
-            "enableDBDeletion": true,
-            "scenarioStatement" : [
-            	{
-            		"operationtype": "insert",
-            		"repeat": 1,
-            		"content": "insert into"
-            	},
-            	{
-            		"operationtype": "select",
-            		"repeat": 1,
-            		"content": "select from"
             	}
             ]
         }
