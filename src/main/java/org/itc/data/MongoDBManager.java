@@ -39,15 +39,6 @@ public class MongoDBManager extends IStorageManager
     {
         super();
         this.amount_of_records = amount_of_records;
-        this.isTableSharding = isTableSharding;
-
-        if (this.isTableSharding)
-        {
-            for (int i = 0; i < this.amount_of_dataseries; i++)
-            {
-                this.gmMeasurementCollectionMap.put((long) i, null);
-            }
-        }
     }
 
     @Override
@@ -56,20 +47,8 @@ public class MongoDBManager extends IStorageManager
         this.mongoClient = MongoDBConnectionManager.getMongoDBConnection();
         this.irisitestdb = mongoClient.getDB(IRIS_TEST_DB);
 
-        if (this.isTableSharding)
-        {
-            for (Entry<Long, DBCollection> entry : this.gmMeasurementCollectionMap.entrySet())
-            {
-                long dsId = entry.getKey();
-                DBCollection gmMeasurementSingleCollection = entry.getValue();
-                gmMeasurementSingleCollection = irisitestdb.getCollection(IRIS_TEST_COLLECTION + "_" + dsId);
-                entry.setValue(gmMeasurementSingleCollection);
-            }
-        }
-        else
-        {
             this.gmMeasurementCollection = irisitestdb.getCollection(IRIS_TEST_COLLECTION);
-        }
+        
     }
 
     @Override
@@ -82,14 +61,7 @@ public class MongoDBManager extends IStorageManager
         this.irisitestdb = null;
         this.gmMeasurementCollection = null;
 
-        if (this.isTableSharding)
-        {
-            for (Entry<Long, DBCollection> entry : this.gmMeasurementCollectionMap.entrySet())
-            {
-                DBCollection gmMeasurementSingleCollection = entry.getValue();
-                gmMeasurementSingleCollection = null;
-            }
-        }
+        
     }
 
     @Override
@@ -102,21 +74,10 @@ public class MongoDBManager extends IStorageManager
 
         System.out.println("CREATING MongoDB Collections...");
 
-        if (this.isTableSharding)
-        {
-            for (Entry<Long, DBCollection> entry : this.gmMeasurementCollectionMap.entrySet())
-            {
-                long dsId = entry.getKey();
-                DBCollection gmMeasurementSingleCollection = entry.getValue();
-                irisitestdb.createCollection(IRIS_TEST_COLLECTION + "_" + dsId, null);
-                gmMeasurementSingleCollection.ensureIndex(new BasicDBObject("fkDataSeriesId", 1).append("measDateUtc", 1), "Index2");
-            }
-        }
-        else
-        {
+        
             irisitestdb.createCollection(IRIS_TEST_COLLECTION, null);
             gmMeasurementCollection.ensureIndex(new BasicDBObject("fkDataSeriesId", 1).append("measDateUtc", 1), "Index2");
-        }
+        
     }
 
     @Override
@@ -147,16 +108,8 @@ public class MongoDBManager extends IStorageManager
         BasicDBObject query = new BasicDBObject("fkDataSeriesId", dsId);
 
         DBCursor cursor = null;
-
-        if (this.isTableSharding)
-        {
-            DBCollection gmMeasurementSingleCollection = this.gmMeasurementCollectionMap.get((long) dsId);
-            cursor = gmMeasurementSingleCollection.find(query);
-        }
-        else
-        {
             cursor = this.gmMeasurementCollection.find(query);
-        }
+        
 
         queryTime = System.currentTimeMillis() - queryTime;
 
@@ -283,22 +236,7 @@ public class MongoDBManager extends IStorageManager
     private void insertMeasurement(long id, int projectId, long fkDataSeriesId, Date measDateUtc, Date measDateSite, double measvalue)
     {
 
-        if (this.isTableSharding)
-        {
-            DBCollection gmMeasurementSingleCollection = this.gmMeasurementCollectionMap.get(fkDataSeriesId);
-
-            if (this.primaryIdAutoIncrement)
-            {
-                gmMeasurementSingleCollection.insert(this.getMeasurementObject(projectId, fkDataSeriesId, measDateUtc, measDateSite, measvalue));
-            }
-            else
-            {
-                gmMeasurementSingleCollection.insert(this.getMeasurementObject(id, projectId, fkDataSeriesId, measDateUtc, measDateSite, measvalue));
-            }
-
-        }
-        else
-        {
+        
             if (this.primaryIdAutoIncrement)
             {
                 this.gmMeasurementCollection.insert(this.getMeasurementObject(projectId, fkDataSeriesId, measDateUtc, measDateSite, measvalue));
@@ -307,7 +245,7 @@ public class MongoDBManager extends IStorageManager
             {
                 this.gmMeasurementCollection.insert(this.getMeasurementObject(id, projectId, fkDataSeriesId, measDateUtc, measDateSite, measvalue));
             }
-        }
+        
 
     }
 
@@ -339,5 +277,35 @@ public class MongoDBManager extends IStorageManager
 
         return measureementDocument;
     }
+
+	@Override
+	public void execCreateOperation(String content) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execInsertOperation(String content, int repeation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execSelectOperation(String content, int repeation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execDeleteOperation(String content) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execDropOperation(String content) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

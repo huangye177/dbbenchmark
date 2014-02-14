@@ -5,7 +5,9 @@ import lombok.Data;
 @Data
 public class ScenarioStatement
 {
-    private String type = "";
+    private String operationtype = "";
+    private int repeat = 1;
+    private String interoperate = "";
     private String content = "";
 
     public ScenarioStatement()

@@ -28,8 +28,6 @@ public abstract class IStorageManager
     final protected double printthreshold = 0.1;
     protected double currentThreshold = 0.1;
 
-    protected boolean isTableSharding = false;
-
     protected int partition = 1;
     protected String partitionId = "id";
 
@@ -57,6 +55,18 @@ public abstract class IStorageManager
     public abstract double getMeasurementDataSize();
 
     public abstract double getMeasurementDataIndexSize();
+    
+    // --
+    
+    public abstract void execCreateOperation(String content);
+    
+    public abstract void execInsertOperation(String content, int repeation);
+    
+    public abstract void execSelectOperation(String content, int repeation);
+    
+    public abstract void execDeleteOperation(String content);
+    
+    public abstract void execDropOperation(String content);
 
     public void registerObserver(IObserver observer)
     {
@@ -71,28 +81,6 @@ public abstract class IStorageManager
 
     public void notifyObservers()
     {
-        // if (this.indexFetchCounter == 0)
-        // {
-        // /*
-        // * now it should be query with NO index
-        // */
-        // if (((double) this.nonindexFetchCounter / this.amount_of_records) <
-        // this.currentThreshold)
-        // {
-        // // nothing wrong or sth wrong, lol
-        // }
-        // else
-        // {
-        // this.currentThreshold += this.printthreshold;
-        // String msg = "Query_withOUT_index, current executed queries: ";
-        //
-        // for (IObserver ob : observers)
-        // {
-        // ob.update(msg, nonindexFetchCounter);
-        // }
-        // }
-        //
-        // }
     }
 
     protected int getProjectId()

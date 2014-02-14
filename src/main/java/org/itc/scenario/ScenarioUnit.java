@@ -17,6 +17,7 @@ public class ScenarioUnit
 
     private int dataSetSizeList = 1;
 
+    private String dbType = "";
     private String databaseDriver = "";
     private String databaseConnection = "";
     private String databaseUsername = "";

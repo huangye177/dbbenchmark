@@ -38,7 +38,6 @@ public class MySQLManager extends IStorageManager
     {
         super();
         this.amount_of_records = amount_of_records;
-        this.isTableSharding = isTableSharding;
         this.partition = partition;
 
         if (partition < 1)
@@ -68,56 +67,6 @@ public class MySQLManager extends IStorageManager
 
         List<String> tableCreationSQL = new ArrayList<String>();
 
-        if (this.isTableSharding)
-        {
-            String createStr = null;
-
-            for (int i = 0; i < this.amount_of_dataseries; i++)
-            {
-                long dsId = i;
-
-                if (this.primaryIdAutoIncrement)
-                {
-                    createStr = "CREATE TABLE `gm_std_measurements_" + dsId + "` (\n" +
-                            "  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n" +
-                            "  `project_id` int(11) DEFAULT NULL,\n" +
-                            "  `fkDataSeriesId` bigint(20) DEFAULT NULL,\n" +
-                            "  `measDateUtc` datetime DEFAULT NULL,\n" +
-                            "  `measDateSite` datetime DEFAULT NULL,\n" +
-                            "  `measvalue` double DEFAULT NULL,\n" +
-                            "  `refMeas` bit(1) DEFAULT NULL,\n" +
-                            "  `reliability` double DEFAULT NULL,\n" +
-                            "  PRIMARY KEY (`id`),\n" +
-                            // "  KEY `Index1` (`fkDataSeriesId`),\n" +
-                            "  KEY `Index2` (`fkDataSeriesId`,`measDateUtc`)\n" +
-                            // "  KEY `Index3` (`measDateUtc`)\n" +
-                            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;";
-
-                }
-                else
-                {
-                    createStr = "CREATE TABLE `gm_std_measurements_" + dsId + "` (\n" +
-                            "  `id` bigint(20) NOT NULL,\n" +
-                            "  `project_id` int(11) DEFAULT NULL,\n" +
-                            "  `fkDataSeriesId` bigint(20) DEFAULT NULL,\n" +
-                            "  `measDateUtc` datetime DEFAULT NULL,\n" +
-                            "  `measDateSite` datetime DEFAULT NULL,\n" +
-                            "  `measvalue` double DEFAULT NULL,\n" +
-                            "  `refMeas` bit(1) DEFAULT NULL,\n" +
-                            "  `reliability` double DEFAULT NULL,\n" +
-                            "  PRIMARY KEY (`id`),\n" +
-                            // "  KEY `Index1` (`fkDataSeriesId`),\n" +
-                            "  KEY `Index2` (`fkDataSeriesId`,`measDateUtc`)\n" +
-                            // "  KEY `Index3` (`measDateUtc`)\n" +
-                            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;";
-
-                }
-
-                tableCreationSQL.add(createStr);
-            }
-        }
-        else
-        {
             String createStr = null;
 
             if (this.primaryIdAutoIncrement)
@@ -217,12 +166,12 @@ public class MySQLManager extends IStorageManager
             }
 
             tableCreationSQL.add(createStr);
-        }
+        
 
         /*
          * create one or multi-sharding tables
          */
-        for (String createStr : tableCreationSQL)
+        for (String createStrst : tableCreationSQL)
         {
             Statement stmt = null;
 
@@ -230,7 +179,7 @@ public class MySQLManager extends IStorageManager
             {
                 stmt = this.conn.createStatement();
 
-                stmt.executeUpdate(createStr);
+                stmt.executeUpdate(createStrst);
             }
             catch (SQLException e)
             {
@@ -358,16 +307,10 @@ public class MySQLManager extends IStorageManager
         int dsId = this.getDataSeriesId();
 
         String selectStr = "";
-        if (this.isTableSharding)
-        {
-            selectStr = "SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_" + dsId + " " +
-                    "WHERE fkDataSeriesId=?;";
-        }
-        else
-        {
+        
             selectStr = "SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements " +
                     "WHERE fkDataSeriesId=?;";
-        }
+        
 
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
@@ -488,19 +431,10 @@ public class MySQLManager extends IStorageManager
     {
         List<String> deleteStrList = new ArrayList<String>();
 
-        if (this.isTableSharding)
-        {
-            for (int i = 0; i < this.amount_of_dataseries; i++)
-            {
-                String deleteStr = "DROP TABLE gm_std_measurements_" + i + ";";
-                deleteStrList.add(deleteStr);
-            }
-        }
-        else
-        {
-            String deleteStr = "DROP TABLE gm_std_measurements;";
-            deleteStrList.add(deleteStr);
-        }
+        
+            String deleteStrstr = "DROP TABLE gm_std_measurements;";
+            deleteStrList.add(deleteStrstr);
+        
 
         /*
          * delete one or multi- created tables/table-shards
@@ -675,55 +609,6 @@ public class MySQLManager extends IStorageManager
     {
         String insertStr = null;
 
-        if (this.isTableSharding)
-        {
-            if (this.primaryIdAutoIncrement)
-            {
-                insertStr = "INSERT INTO `gm_std_measurements_" + fkDataSeriesId + "`\n" +
-                        "(`project_id`,\n" +
-                        "`fkDataSeriesId`,\n" +
-                        "`measDateUtc`,\n" +
-                        "`measDateSite`,\n" +
-                        "`measvalue`,\n" +
-                        "`refMeas`,\n" +
-                        "`reliability`)\n" +
-                        "VALUES\n" +
-                        "(\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "0,\n" +
-                        "1.0\n" +
-                        ");";
-            }
-            else
-            {
-                insertStr = "INSERT INTO `gm_std_measurements_" + fkDataSeriesId + "`\n" +
-                        "(`id`,\n" +
-                        "`project_id`,\n" +
-                        "`fkDataSeriesId`,\n" +
-                        "`measDateUtc`,\n" +
-                        "`measDateSite`,\n" +
-                        "`measvalue`,\n" +
-                        "`refMeas`,\n" +
-                        "`reliability`)\n" +
-                        "VALUES\n" +
-                        "(\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "0,\n" +
-                        "1.0\n" +
-                        ");";
-            }
-        }
-        else
-        {
             if (this.primaryIdAutoIncrement)
             {
                 insertStr = "INSERT INTO `gm_std_measurements`\n" +
@@ -768,7 +653,7 @@ public class MySQLManager extends IStorageManager
                         "1.0\n" +
                         ");";
             }
-        }
+        
 
         PreparedStatement preparedStatement = null;
 
@@ -907,5 +792,35 @@ public class MySQLManager extends IStorageManager
     {
         return new java.sql.Date(date.getTime());
     }
+
+	@Override
+	public void execCreateOperation(String content) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execInsertOperation(String content, int repeation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execSelectOperation(String content, int repeation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execDeleteOperation(String content) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execDropOperation(String content) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

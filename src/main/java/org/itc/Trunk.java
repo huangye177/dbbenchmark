@@ -15,8 +15,12 @@ import org.itc.data.IStorageManager;
 import org.itc.data.MongoDBManager;
 import org.itc.data.MySQLManager;
 import org.itc.data.StorageCRUDThread;
+import org.itc.model.DBFactory;
+import org.itc.model.DBType;
+import org.itc.model.OperationType;
 import org.itc.scenario.IObserver;
 import org.itc.scenario.JSONSettingReaderWriter;
+import org.itc.scenario.ScenarioStatement;
 import org.itc.scenario.ScenarioUnit;
 import org.itc.scenario.Scenarios;
 import org.itc.scenario.StaticObserver;
@@ -84,7 +88,7 @@ public class Trunk
             // create DB
             if (enableDBCreate)
             {
-                this.dbCreatScenario(dbType, dataSetSize, false, -1);
+                this.dbCreatScenario(su);
             }
 
             // insert tests
@@ -117,7 +121,7 @@ public class Trunk
             // delete data
             if (enableDBDeletion)
             {
-                this.dbDeleteScenario(dbType, dataSetSize, false, -1);
+                this.dbDeleteScenario(su);
 
                 /*
                  * sleep for a few minutes thus machine CPU and Memory can be
@@ -333,22 +337,11 @@ public class Trunk
     /**
      * Create DB/table in single thread
      */
-    public void dbCreatScenario(String dbType, long amountOfMeasData, boolean isTableSharding, int partition)
+    public void dbCreatScenario(ScenarioUnit su)
     {
-        IStorageManager dbManager = null;
-
-        if (dbType.equalsIgnoreCase("mongodb"))
-        {
-            dbManager = new MongoDBManager(amountOfMeasData, isTableSharding);
-        }
-        else if (dbType.equalsIgnoreCase("mysql"))
-        {
-            dbManager = new MySQLManager(amountOfMeasData, isTableSharding, partition);
-        }
-        else
-        {
-            dbManager = null;
-        }
+    	DBType dbType = DBType.valueOf(su.getDbType());
+    	
+        IStorageManager dbManager = DBFactory.buildDBManager(dbType);
 
         /*
          * initialize connection, db, and table/collection
@@ -356,12 +349,19 @@ public class Trunk
         dbManager.initConnection();
 
         Calendar cal = Calendar.getInstance();
-        System.out.println("Table creating time: " + dateFormat.format(cal.getTime()) + " Table Sharding: " + isTableSharding);
+        System.out.println("DB create operation time: " + dateFormat.format(cal.getTime()));
 
-        /*
-         * create collection/indexes or table
-         */
-        dbManager.createMeasurementTable();
+        for(ScenarioStatement stat : su.getScenarioStatement()) {
+        	
+        	OperationType operType = OperationType.valueOf(stat.getOperationtype());
+        	
+        	if(OperationType.CREATE.equals(operType)) {
+        		/*
+                 * create collection/indexes or table
+                 */
+        		dbManager.execCreateOperation(stat.getContent());
+        	}
+        }
 
         /*
          * set db and collection to NULL
@@ -372,32 +372,31 @@ public class Trunk
     /**
      * Delete/drop DB/table in single thread
      */
-    public void dbDeleteScenario(String dbType, long amountOfMeasData, boolean isTableSharding, int partition)
+    public void dbDeleteScenario(ScenarioUnit su)
     {
-        IStorageManager dbManager = null;
-
-        if (dbType.equalsIgnoreCase("mongodb"))
-        {
-            dbManager = new MongoDBManager(amountOfMeasData, isTableSharding);
-        }
-        else if (dbType.equalsIgnoreCase("mysql"))
-        {
-            dbManager = new MySQLManager(amountOfMeasData, isTableSharding, partition);
-        }
-        else
-        {
-            dbManager = null;
-        }
+    	DBType dbType = DBType.valueOf(su.getDbType());
+    	
+        IStorageManager dbManager = DBFactory.buildDBManager(dbType);
 
         /*
          * initialize connection, db, and table/collection
          */
         dbManager.initConnection();
 
-        /*
-         * drop measurement table
-         */
-        dbManager.dropMeasurementTable();
+        Calendar cal = Calendar.getInstance();
+        System.out.println("DB delete operation time: " + dateFormat.format(cal.getTime()));
+
+        for(ScenarioStatement stat : su.getScenarioStatement()) {
+        	
+        	OperationType operType = OperationType.valueOf(stat.getOperationtype());
+        	
+        	if(OperationType.DELETE.equals(operType)) {
+        		/*
+                 * create collection/indexes or table
+                 */
+        		dbManager.execDeleteOperation(stat.getContent());
+        	}
+        }
 
         /*
          * set db and collection to NULL
