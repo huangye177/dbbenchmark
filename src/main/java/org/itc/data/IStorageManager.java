@@ -36,7 +36,7 @@ public abstract class IStorageManager
         this.currentThreshold = 0.1;
     }
 
-    public abstract void initConnection();
+    public abstract void initConnection(String connString, String username, String password);
 
     public abstract void closeConnection();
 

@@ -42,7 +42,7 @@ public class MongoDBManager extends IStorageManager
     }
 
     @Override
-    public void initConnection()
+    public void initConnection(String connString, String username, String password)
     {
         this.mongoClient = MongoDBConnectionManager.getMongoDBConnection();
         this.irisitestdb = mongoClient.getDB(IRIS_TEST_DB);

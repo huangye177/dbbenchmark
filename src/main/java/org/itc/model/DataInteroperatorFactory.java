@@ -2,13 +2,13 @@ package org.itc.model;
 
 public class DataInteroperatorFactory {
 
-	public static DataInteroperator buildDataInteroperator(InteroperateType interoperatorType) {
+	public static IDataInteroperator buildDataInteroperator(InteroperateType interoperatorType) {
 		
-		DataInteroperator interoperator = null;
+		IDataInteroperator interoperator = null;
 		
 		switch (interoperatorType) {
 			case GEOMONI_BASIC: {
-				interoperator = null;
+				interoperator = new InteroperatorGeomoniBasic();
 				break;
 			}
 			case TUNNEL_BASIC: {

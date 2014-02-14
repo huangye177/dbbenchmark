@@ -5,8 +5,6 @@
             "batchMode": false,
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
-            "numberOfSelections": 1000, 
-            "dataSetSizeList" : 10000,
             "dbtype": "MYSQL"
             "databaseDriver": "com.mysql.jdbc.Driver",
             "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",
@@ -17,6 +15,22 @@
             "enableDBQuery":true,
             "enableDBDeletion": true,
             "scenarioStatement" : [
+            	{
+            		"operationtype": "CREATE",
+            		"repeat": 1,
+            		"interoperate": NULL,
+            		"content": "
+					    GRANT CREATE,SELECT,INSERT,DELETE,UPDATE,ALTER,DROP ON iristestdb.* TO 'iristestdb'@'localhost' IDENTIFIED BY 'iristestdb'; 
+					"
+            	},
+            	{
+            		"operationtype": "CREATE",
+            		"repeat": 1,
+            		"interoperate": NULL,
+            		"content": "
+					    FLUSH PRIVILEGES; 
+					"
+            	},
             	{
             		"operationtype": "CREATE",
             		"repeat": 1,
@@ -44,15 +58,15 @@
             		    INSERT INTO `gm_std_measurements`
 						(`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`)
 						VALUES
-						(?,?,?,?,?,0,1.0);
+						?, ?, ?, ?, ?, 0, 1.0);
 					"
             	},
             	{
             		"operationtype": "SELECT",
             		"repeat": 1,
-            		"interoperate": "GEOMONI_BASIC",
+            		"interoperate": NULL,
             		"content": "
-            			SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements WHERE fkDataSeriesId=?;
+            			SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements WHERE fkDataSeriesId=FLOOR(RAND() * 1000);
             		"
             	},
             	{

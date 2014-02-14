@@ -10,12 +10,8 @@ import org.itc.scenario.TraceObserver;
 
 public class StorageCRUDThread extends Thread
 {
-    protected long amountOfMeasDataPerThread = 0;
-    protected String dbType = "";
-
-    protected boolean isTableSharding = false;
-    protected int partition = 1;
-    protected boolean isBatchMode = false;
+	protected IStorageManager dbManager = null;
+	protected int numOperationsPerThread = 0;
 
     protected Log logger = null;
     volatile protected boolean executionReady = false;
@@ -38,43 +34,12 @@ public class StorageCRUDThread extends Thread
 
     }
 
-    protected void dbInsertScenario(String dbType, long amountOfMeasData, boolean isBatchMode)
+    protected void dbInsertScenario(IStorageManager dbManager, int numInsertPerThread)
     {
         this.executionReady = false;
-
-        IStorageManager dbManager = null;
-
-        if (dbType.equalsIgnoreCase("mongodb"))
-        {
-            dbManager = new MongoDBManager(amountOfMeasData, this.isTableSharding);
-        }
-        else if (dbType.equalsIgnoreCase("mysql"))
-        {
-            dbManager = new MySQLManager(amountOfMeasData, this.isTableSharding, this.partition);
-        }
-        else
-        {
-            dbManager = null;
-        }
-
-        /*
-         * initialize connection, db, and table/collection
-         */
-        dbManager.initConnection();
-
-        /*
-         * insert all measurement data
-         */
-        if (isBatchMode)
-        {
-            dbManager.insertMeasurementsInBatch();
-        }
-        else
-        {
+        
+        // NOTICE: db connection should be managed out of thread
             dbManager.insertMeasurements();
-        }
-
-        dbManager.closeConnection();
 
         /*
          * set the execution mark as done
@@ -83,54 +48,15 @@ public class StorageCRUDThread extends Thread
 
     }
 
-    protected void dbReadScenario(String dbType, long amountOfMeasData, int numberOfSelections, boolean isSelectionWithIndex)
+    protected void dbReadScenario(IStorageManager dbManager, int numInsertPerThread)
     {
         this.executionReady = false;
         this.totalQueryTime = 0;
         this.totalQueryFetchTime = 0;
 
-        IStorageManager dbManager = null;
-
-        if (dbType.equalsIgnoreCase("mongodb"))
-        {
-            dbManager = new MongoDBManager(amountOfMeasData, this.isTableSharding);
-        }
-        else if (dbType.equalsIgnoreCase("mysql"))
-        {
-            dbManager = new MySQLManager(amountOfMeasData, this.isTableSharding, this.partition);
-        }
-        else
-        {
-            dbManager = null;
-        }
         dbManager.registerObserver(traceObserver);
 
-        /*
-         * initialize connection, db, and table/collection
-         */
-        dbManager.initConnection();
-
-        /*
-         * read data
-         */
-        if (isSelectionWithIndex)
-        {
-            for (int j = 0; j < numberOfSelections; j++)
-            {
-                long[] totalTime = dbManager.selectMeasurementByDataSeriesId();
-                this.totalQueryTime += totalTime[0];
-                this.totalQueryFetchTime += totalTime[1];
-            }
-        }
-        else
-        {
-            for (int j = 0; j < numberOfSelections; j++)
-            {
-                long[] totalTime = dbManager.selectMeasurementByProjectId();
-                this.totalQueryTime += totalTime[0];
-                this.totalQueryFetchTime += totalTime[1];
-            }
-        }
+        dbManager.selectMeasurementByDataSeriesId();
 
         /*
          * set the execution mark as done

@@ -19,14 +19,6 @@ public class MySQLManager extends IStorageManager
 
     private Connection conn = null;
 
-    /**
-     * GRANT CREATE,SELECT,INSERT,DELETE,UPDATE,ALTER,DROP ON iristestdb.* TO
-     * 'iristestdb'@'localhost' IDENTIFIED BY 'iristestdb'; FLUSH PRIVILEGES;
-     */
-    final private String connString = "jdbc:mysql://127.0.0.1:3306/iristestdb";
-    final private String userName = "iristestdb";
-    final private String password = "iristestdb";
-
     private long amount_of_records = 0;
 
     public MySQLManager()
@@ -48,9 +40,9 @@ public class MySQLManager extends IStorageManager
     }
 
     @Override
-    public void initConnection()
+    public void initConnection(String connString, String username, String password)
     {
-        this.conn = MySQLConnectionManager.getDBConnection(this.connString, this.userName, this.password);
+        this.conn = MySQLConnectionManager.getDBConnection(connString, username, password);
         // this.printDBMetaInfo();
     }
 

@@ -13,9 +13,6 @@ public class ScenarioUnit
 
     private int numOfInsertThread = 1;
     private int numOfQueryThread = 1;
-    private int numberOfSelections = 1;
-
-    private int dataSetSizeList = 1;
 
     private String dbType = "";
     private String databaseDriver = "";

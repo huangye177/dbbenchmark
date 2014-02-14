@@ -78,12 +78,10 @@ public class Trunk
             boolean enableDBQuery = su.isEnableDBQuery();
             boolean enableDBDeletion = su.isEnableDBDeletion();
 
+            String dbType = su.getDatabaseDriver();
+            
             int numOfInsertThread = su.getNumOfInsertThread();
             int numOfQueryThread = su.getNumOfQueryThread();
-            // queries
-            int numberOfSelections = su.getNumberOfSelections();
-            String dbType = su.getDatabaseDriver();
-            long dataSetSize = su.getDataSetSizeList();
 
             // create DB
             if (enableDBCreate)
@@ -94,8 +92,7 @@ public class Trunk
             // insert tests
             if (enableDBInsert)
             {
-                this.dbInsertThreadLaunch(dbType, dataSetSize, numOfInsertThread,
-                        false, -1, isBatchMode);
+                this.dbInsertThreadLaunch(su);
             }
 
             // query DB with different query options
@@ -114,8 +111,7 @@ public class Trunk
                     e.printStackTrace();
                 }
 
-                this.dbReadThreadLaunch(dbType, dataSetSize, numOfQueryThread, numberOfSelections, null,
-                        false, -1);
+                this.dbReadThreadLaunch(su);
             }
 
             // delete data
@@ -142,41 +138,36 @@ public class Trunk
     /**
      * Insert into DB in multi- threads
      */
-    private void dbInsertThreadLaunch(String dbType, long amountOfMeasData, int numOfThread,
-            boolean isTableSharding, int partition, boolean isBatchMode)
+    private void dbInsertThreadLaunch(ScenarioUnit su)
     {
+    	DBType dbType = DBType.valueOf(su.getDbType());
+    	
+        IStorageManager dbManager = DBFactory.buildDBManager(dbType);
+        
         IStorageManager dbManagerForSizeCheck = null;
-
-        if (dbType.equalsIgnoreCase("mongodb"))
-        {
-            dbManagerForSizeCheck = new MongoDBManager(amountOfMeasData, isTableSharding);
-        }
-        else if (dbType.equalsIgnoreCase("mysql"))
-        {
-            dbManagerForSizeCheck = new MySQLManager(amountOfMeasData, isTableSharding, partition);
-        }
-        else
-        {
-            dbManagerForSizeCheck = null;
-        }
-        dbManagerForSizeCheck.initConnection();
+        
+        dbManagerForSizeCheck.initConnection(su.getDatabaseConnection(), su.getDatabaseUsername(), su.getDatabasePassword());
 
         Calendar cal = Calendar.getInstance();
         long startTime = System.currentTimeMillis();
 
         String info = "\n------------ SCENARIO-INSERT **START: " + " @Datetime: " + dateFormat.format(cal.getTime());
-        info += "\nParam: [dbType]: " + dbType + "; [dataSize]: " + amountOfMeasData;
+        info += "\nParam: [dbType]: " + dbType;
         this.staticObserver.update(info);
-
-        /*
-         * prepare all threads for insert task
-         */
+        
+        // launch each insert operation with single-/multi- thread
         this.dbInsertThread.clear();
-        long amountOfMeasDataPerThread = amountOfMeasData / numOfThread;
-        for (int i = 0; i < numOfThread; i++)
-        {
-            this.dbInsertThread.add(new DBInsertThread(dbType, amountOfMeasDataPerThread,
-                    isTableSharding, partition, isBatchMode));
+        for(ScenarioStatement stat : su.getScenarioStatement()) {
+        	
+        	OperationType operType = OperationType.valueOf(stat.getOperationtype());
+        	
+        	if(OperationType.INSERT.equals(operType)) {
+        		
+        		int numInsert = stat.getRepeat();
+        		int numInsertPerThread = numInsert / su.getNumOfInsertThread();
+        		
+        		this.dbInsertThread.add(new DBInsertThread(dbManager, numInsertPerThread));
+        	}
         }
 
         /*
@@ -186,8 +177,6 @@ public class Trunk
         {
             thread.start();
         }
-
-        System.out.println("INTOAL " + numOfThread + " THREADS STARTED!");
 
         /*
          * check results of all threads for insert task
@@ -212,7 +201,7 @@ public class Trunk
         long durationMillis = endTime - startTime;
         double durationSecond = durationMillis / 1000;
 
-        info = "\n[---DONE---] SCENARIO-INSERT *END: (" + dbType + "/" + amountOfMeasData + ") Execution duration: " + durationSecond + " seconds ("
+        info = "\n[---DONE---] SCENARIO-INSERT *END: (" + dbType + ") Execution duration: " + durationSecond + " seconds ("
                 + durationMillis + " milliseocnds)";
         info += "\n" + dbType + " DB SIZE: " + (sizeKB / 1024) + "MB (" + (sizeKB / 1024 / 1024) + " GB /" + sizeKB + " KB)";
         info += "\n" + dbType + " DB INDEX SIZE: " + (indexKB / 1024) + "MB (" + (indexKB / 1024 / 1024) + " GB /" + indexKB + " KB)";
@@ -224,8 +213,7 @@ public class Trunk
     /**
      * Query from DB in multi- threads
      */
-    private void dbReadThreadLaunch(String dbType, long amountOfMeasData, int numOfThread, int numberOfSelections, boolean[] isSelectionWithIndexList,
-            boolean isTableSharding, int partition)
+    private void dbReadThreadLaunch(ScenarioUnit su)
     {
         /*
          * make main thread to sleep a while to ensure MongoDB memory-dish flush
@@ -240,43 +228,39 @@ public class Trunk
             e1.printStackTrace();
         }
 
-        for (boolean isSelectionWithIndex : isSelectionWithIndexList)
-        {
-            IStorageManager dbManagerForSizeCheck = null;
+        DBType dbType = DBType.valueOf(su.getDbType());
+    	
+        IStorageManager dbManager = DBFactory.buildDBManager(dbType);
+        
+        dbManager.initConnection(su.getDatabaseConnection(), su.getDatabaseUsername(), su.getDatabasePassword());
 
-            if (dbType.equalsIgnoreCase("mongodb"))
-            {
-                dbManagerForSizeCheck = new MongoDBManager(amountOfMeasData, isTableSharding);
-            }
-            else if (dbType.equalsIgnoreCase("mysql"))
-            {
-                dbManagerForSizeCheck = new MySQLManager(amountOfMeasData, isTableSharding, partition);
-            }
-            else
-            {
-                dbManagerForSizeCheck = null;
-            }
-            dbManagerForSizeCheck.initConnection();
 
             Calendar cal = Calendar.getInstance();
             long startTime = System.currentTimeMillis();
 
             String info = "\n------------ SCENARIO-READ ++START: " + " @Datetime: " + dateFormat.format(cal.getTime());
-            info += "\nParam: [dbType]: " + dbType + "; [dataSize]: " + amountOfMeasData + "; [numberOfSelections]: " + numberOfSelections
-                    + "; [select_with_index?]:" + isSelectionWithIndex;
+            info += "\nParam: [dbType]: " + dbType + "; " 
+                    + ";" ;
+            
             this.staticObserver.update(info);
 
             /*
              * prepare all threads for query task
              */
             this.dbQueryThread.clear();
-            long amountOfMeasDataPerThread = amountOfMeasData / numOfThread;
-            for (int i = 0; i < numOfThread; i++)
-            {
-                this.dbQueryThread.add(new DBQueryThread(dbType, amountOfMeasDataPerThread, numberOfSelections,
-                        isSelectionWithIndex, isTableSharding, partition));
+            for(ScenarioStatement stat : su.getScenarioStatement()) {
+            	OperationType operType = OperationType.valueOf(stat.getOperationtype());
+            	
+            	if(OperationType.SELECT.equals(operType)) {
+            		
+            		int numSelect = stat.getRepeat();
+            		int numSelectPerThread = numSelect / su.getNumOfInsertThread();
+            		
+            		this.dbQueryThread.add(new DBInsertThread(dbManager, numSelectPerThread));
+            	}
             }
-
+            
+            // --
             /*
              * start all threads for query task
              */
@@ -284,8 +268,6 @@ public class Trunk
             {
                 thread.start();
             }
-
-            System.out.println("INTOAL " + numOfThread + " THREADS STARTED!");
 
             /*
              * check results of all threads for query task
@@ -310,15 +292,13 @@ public class Trunk
                 totalQueryFetchTime += thread.getTotalQueryFetchTime();
             }
 
-            double sizeKB = dbManagerForSizeCheck.getMeasurementDataSize();
-            double indexKB = dbManagerForSizeCheck.getMeasurementDataIndexSize();
-            dbManagerForSizeCheck.closeConnection();
+            dbManager.closeConnection();
 
             long endTime = System.currentTimeMillis();
             long durationMillis = endTime - startTime;
             double durationSecond = durationMillis / 1000;
 
-            info = "\n[---DONE---] SCENARIO-READ +END: (" + dbType + "/" + amountOfMeasData + "-" + numberOfSelections + ") Execution duration: "
+            info = "\n[---DONE---] SCENARIO-READ +END: (" + ") Execution duration: "
                     + durationSecond
                     + " seconds ("
                     + durationMillis + " milliseocnds)" + "; Total Query duration: "
@@ -326,12 +306,10 @@ public class Trunk
                     + "; Total Query+Fetch duration: "
                     + (totalQueryFetchTime / 1000) + " seconds (" + totalQueryFetchTime + " milliseocnds) "
                     + ".";
-            info += "\n" + dbType + " DB SIZE: " + (sizeKB / 1024) + "MB (" + (sizeKB / 1024 / 1024) + " GB /" + sizeKB + " KB)";
-            info += "\n" + dbType + " DB INDEX SIZE: " + (indexKB / 1024) + "MB (" + (indexKB / 1024 / 1024) + " GB /" + indexKB + " KB)";
 
             this.dbQueryThread.clear();
             this.staticObserver.update(info, 0);
-        }
+        
     }
 
     /**
@@ -346,7 +324,7 @@ public class Trunk
         /*
          * initialize connection, db, and table/collection
          */
-        dbManager.initConnection();
+        dbManager.initConnection(su.getDatabaseConnection(), su.getDatabaseUsername(), su.getDatabasePassword());
 
         Calendar cal = Calendar.getInstance();
         System.out.println("DB create operation time: " + dateFormat.format(cal.getTime()));
@@ -381,7 +359,7 @@ public class Trunk
         /*
          * initialize connection, db, and table/collection
          */
-        dbManager.initConnection();
+        dbManager.initConnection(su.getDatabaseConnection(), su.getDatabaseUsername(), su.getDatabasePassword());
 
         Calendar cal = Calendar.getInstance();
         System.out.println("DB delete operation time: " + dateFormat.format(cal.getTime()));
