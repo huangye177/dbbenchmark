@@ -17,6 +17,9 @@ public class StaticObserver extends IObserver
         this.initLogFile();
     }
 
+    /**
+     * Update message-observer with message string content and numeric values
+     */
     @Override
     public void update(String msg, double value)
     {
@@ -59,11 +62,14 @@ public class StaticObserver extends IObserver
 
     }
 
+    /**
+     * Update message-observer with message string content
+     */
     @Override
     public void update(String msg)
     {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(Calendar.getInstance().getTime());
-        String infoLine = "" + timeStamp + " \n " + msg;
+        String infoLine = "" + timeStamp + " \n\n" + msg;
 
         System.out.println(infoLine);
         BufferedWriter out = null;

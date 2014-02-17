@@ -14,97 +14,115 @@ import org.itc.model.OperationType;
 import org.itc.scenario.IObserver;
 import org.itc.scenario.TraceObserver;
 
-public class StorageCRUDThread extends Thread {
-	
-	protected IStorageManager dbManager = null;
-	protected int numOperationsPerThread = 0;
-	
-	protected DBType dbType = null;
-	protected InteroperateType interoperatorType = null; 
-	protected String statementContent = "";
-	
-	// --
+public class StorageCRUDThread extends Thread
+{
 
-	protected Log logger = null;
-	volatile protected boolean executionReady = false;
+    protected IStorageManager dbManager = null;
+    protected int numOperationsPerThread = 0;
 
-	private long totalQueryTime = 0;
-	private long totalQueryFetchTime = 0;
+    protected DBType dbType = null;
+    protected InteroperateType interoperatorType = null;
+    protected Object statementContent = "";
 
-	private IObserver traceObserver = new TraceObserver();
+    // --
 
-	DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+    protected Log logger = null;
+    volatile protected boolean executionReady = false;
 
-	public StorageCRUDThread() {
-		this.dateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
-	}
+    private long totalQueryTime = 0;
+    private long totalQueryFetchTime = 0;
 
-	@Override
-	public void run() {
+    private IObserver traceObserver = new TraceObserver();
 
-	}
+    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 
-	protected void dbInsertScenario(IStorageManager dbManager,
-			int numInsertPerThread, DBType dbType, InteroperateType interoperatorType, String statementContent) {
-		
-		this.executionReady = false;
+    public StorageCRUDThread()
+    {
+        this.dateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
+    }
 
-		// NOTICE: DB connection should be managed out of thread
-		for (int i = 0; i < numInsertPerThread; i++)
+    @Override
+    public void run()
+    {
+
+    }
+
+    protected void dbInsertScenario(IStorageManager dbManager,
+            int numInsertPerThread, DBType dbType, InteroperateType interoperatorType, Object statementContent)
+    {
+
+        this.executionReady = false;
+
+        Object interoperatedObject = null;
+
+        // NOTICE: DB connection should be managed out of thread
+        for (int i = 0; i < numInsertPerThread; i++)
         {
-			if(interoperatorType != null) {
-				IDataInteroperator interoperator = DataInteroperatorFactory.buildDataInteroperator(interoperatorType);
-				statementContent = interoperator.interoperate(statementContent, dbType, OperationType.INSERT);
-			}
-			
-			dbManager.execInsertOperation(statementContent);
-        }
-		
-		/*
-		 * set the execution mark as done
-		 */
-		this.executionReady = true;
+            if (interoperatorType != null)
+            {
+                IDataInteroperator interoperator = DataInteroperatorFactory.buildDataInteroperator(interoperatorType);
+                interoperatedObject = interoperator.interoperate(statementContent, dbType, OperationType.INSERT);
+            }
+            else
+            {
+                interoperatedObject = statementContent;
+            }
 
-	}
-
-	protected void dbReadScenario(IStorageManager dbManager,
-			int numSelectPerThread, DBType dbType, InteroperateType interoperatorType, String statementContent) {
-		
-		this.executionReady = false;
-		this.totalQueryTime = 0;
-		this.totalQueryFetchTime = 0;
-
-		dbManager.registerObserver(traceObserver);
-
-		dbManager.selectMeasurementByDataSeriesId();
-		
-		for (int i = 0; i < numSelectPerThread; i++)
-        {
-			if(interoperatorType != null) {
-				IDataInteroperator interoperator = DataInteroperatorFactory.buildDataInteroperator(interoperatorType);
-				statementContent = interoperator.interoperate(statementContent, dbType, OperationType.SELECT);
-			}
-			
-			dbManager.execSelectOperation(statementContent);
+            dbManager.execInsertOperation(interoperatedObject);
         }
 
-		/*
-		 * set the execution mark as done
-		 */
-		this.executionReady = true;
+        /*
+         * set the execution mark as done
+         */
+        this.executionReady = true;
 
-	}
+    }
 
-	public synchronized boolean isExecutionReady() {
-		return this.executionReady;
-	}
+    protected void dbReadScenario(IStorageManager dbManager,
+            int numSelectPerThread, DBType dbType, InteroperateType interoperatorType, Object statementContent)
+    {
 
-	public long getTotalQueryTime() {
-		return totalQueryTime;
-	}
+        this.executionReady = false;
 
-	public long getTotalQueryFetchTime() {
-		return totalQueryFetchTime;
-	}
+        dbManager.registerObserver(traceObserver);
+
+        for (int i = 0; i < numSelectPerThread; i++)
+        {
+            Object interoperatedObject = null;
+
+            if (interoperatorType != null)
+            {
+                IDataInteroperator interoperator = DataInteroperatorFactory.buildDataInteroperator(interoperatorType);
+                interoperatedObject = interoperator.interoperate(statementContent, dbType, OperationType.SELECT);
+            }
+            else
+            {
+                interoperatedObject = statementContent;
+            }
+
+            dbManager.execSelectOperation(interoperatedObject);
+        }
+
+        /*
+         * set the execution mark as done
+         */
+        this.executionReady = true;
+
+    }
+
+    public synchronized boolean isExecutionReady()
+    {
+        return this.executionReady;
+    }
+
+    public long getTotalQueryTime()
+    {
+        return totalQueryTime;
+    }
+
+    public long getTotalQueryFetchTime()
+    {
+        return totalQueryFetchTime;
+    }
 
 }

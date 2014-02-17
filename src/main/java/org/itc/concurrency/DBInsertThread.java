@@ -7,7 +7,7 @@ import org.itc.model.InteroperateType;
 
 public class DBInsertThread extends StorageCRUDThread
 {
-    public DBInsertThread(IStorageManager dbManager, int numInsertPerThread, DBType dbType, InteroperateType interoperatorType, String statementContent)
+    public DBInsertThread(IStorageManager dbManager, int numInsertPerThread, DBType dbType, InteroperateType interoperatorType, Object statementContent)
     {
         logger = LogFactory.getLog(DBInsertThread.class);
 
@@ -16,7 +16,7 @@ public class DBInsertThread extends StorageCRUDThread
         this.dbType = dbType;
         this.interoperatorType = interoperatorType;
         this.statementContent = statementContent;
-        
+
     }
 
     @Override

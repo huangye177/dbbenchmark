@@ -45,6 +45,7 @@ dependencies {
     compile 'mysql:mysql-connector-java:5.1.25'
     compile 'commons-logging:commons-logging:1.1.1'
     
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.3.0'
     compile 'com.fasterxml.jackson.core:jackson-core:2.3.0'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.3.0'

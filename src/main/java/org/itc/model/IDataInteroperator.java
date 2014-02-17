@@ -1,7 +1,7 @@
 package org.itc.model;
 
-public abstract class IDataInteroperator {
+public abstract class IDataInteroperator
+{
+    public abstract Object interoperate(Object originalContent, DBType dbtype, OperationType operType);
 
-	public abstract String interoperate(String originalSQL, DBType dbtype, OperationType operType);
-	
 }

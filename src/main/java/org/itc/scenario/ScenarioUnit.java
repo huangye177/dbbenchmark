@@ -13,16 +13,11 @@ public class ScenarioUnit
     private int numOfInsertThread = 1;
     private int numOfQueryThread = 1;
 
-    private String dbType = "";
+    private String databaseType = "";
     private String databaseDriver = "";
     private String databaseConnection = "";
     private String databaseUsername = "";
     private String databasePassword = "";
-
-    private boolean enableDBCreate = false;
-    private boolean enableDBInsert = false;
-    private boolean enableDBQuery = false;
-    private boolean enableDBDeletion = false;
 
     private List<ScenarioStatement> scenarioStatement = new ArrayList<ScenarioStatement>();
 

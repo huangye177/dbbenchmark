@@ -1,9 +1,12 @@
 package org.itc.data;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.List;
+import java.util.Map;
 
+// import org.json.JSONObject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -19,8 +22,8 @@ import com.mongodb.MongoClient;
  */
 public class MongoDBManager extends IStorageManager
 {
-    final String IRIS_TEST_DB = "iristestdb";
-    final String IRIS_TEST_COLLECTION = "gm_std_measurements";
+    String dbName = "";
+    String collectionName = "";
 
     private MongoClient mongoClient = null;
     private DB irisitestdb = null;
@@ -30,9 +33,20 @@ public class MongoDBManager extends IStorageManager
 
     private long amount_of_records = 0;
 
-    public MongoDBManager()
+    public MongoDBManager(String... args)
     {
         super();
+
+        if (args.length >= 1 && args[0] != null)
+        {
+            this.dbName = args[0];
+        }
+
+        if (args.length >= 2 && args[1] != null)
+        {
+            this.collectionName = args[1];
+        }
+
     }
 
     public MongoDBManager(long amount_of_records, boolean isTableSharding)
@@ -42,13 +56,10 @@ public class MongoDBManager extends IStorageManager
     }
 
     @Override
-    public void initConnection(String connString, String username, String password)
+    public void initConnection()
     {
         this.mongoClient = MongoDBConnectionManager.getMongoDBConnection();
-        this.irisitestdb = mongoClient.getDB(IRIS_TEST_DB);
-
-            this.gmMeasurementCollection = irisitestdb.getCollection(IRIS_TEST_COLLECTION);
-        
+        this.irisitestdb = mongoClient.getDB(dbName);
     }
 
     @Override
@@ -61,10 +72,10 @@ public class MongoDBManager extends IStorageManager
         this.irisitestdb = null;
         this.gmMeasurementCollection = null;
 
-        
     }
 
     @Override
+    @Deprecated
     public void createMeasurementTable()
     {
         // gmMeasurementCollection.ensureIndex(new
@@ -74,13 +85,13 @@ public class MongoDBManager extends IStorageManager
 
         System.out.println("CREATING MongoDB Collections...");
 
-        
-            irisitestdb.createCollection(IRIS_TEST_COLLECTION, null);
-            gmMeasurementCollection.ensureIndex(new BasicDBObject("fkDataSeriesId", 1).append("measDateUtc", 1), "Index2");
-        
+        irisitestdb.createCollection(collectionName, null);
+        gmMeasurementCollection.ensureIndex(new BasicDBObject("fkDataSeriesId", 1).append("measDateUtc", 1), "Index2");
+
     }
 
     @Override
+    @Deprecated
     public void insertMeasurements()
     {
         for (int i = 0; i < this.amount_of_records; i++)
@@ -91,6 +102,7 @@ public class MongoDBManager extends IStorageManager
     }
 
     @Override
+    @Deprecated
     public void insertMeasurementsInBatch()
     {
         // TODO Auto-generated method stub
@@ -98,6 +110,7 @@ public class MongoDBManager extends IStorageManager
     }
 
     @Override
+    @Deprecated
     public long[] selectMeasurementByDataSeriesId()
     {
         long queryTime = System.currentTimeMillis();
@@ -108,8 +121,7 @@ public class MongoDBManager extends IStorageManager
         BasicDBObject query = new BasicDBObject("fkDataSeriesId", dsId);
 
         DBCursor cursor = null;
-            cursor = this.gmMeasurementCollection.find(query);
-        
+        cursor = this.gmMeasurementCollection.find(query);
 
         queryTime = System.currentTimeMillis() - queryTime;
 
@@ -178,11 +190,12 @@ public class MongoDBManager extends IStorageManager
     }
 
     @Override
+    @Deprecated
     public void dropMeasurementTable()
     {
         // this.gmMeasurementCollection.dropIndexes();
         // this.gmMeasurementCollection.drop();
-        this.mongoClient.dropDatabase(IRIS_TEST_DB);
+        this.mongoClient.dropDatabase(dbName);
     }
 
     @Override
@@ -233,22 +246,22 @@ public class MongoDBManager extends IStorageManager
      * private util methods
      ************************/
 
+    @Deprecated
     private void insertMeasurement(long id, int projectId, long fkDataSeriesId, Date measDateUtc, Date measDateSite, double measvalue)
     {
 
-        
-            if (this.primaryIdAutoIncrement)
-            {
-                this.gmMeasurementCollection.insert(this.getMeasurementObject(projectId, fkDataSeriesId, measDateUtc, measDateSite, measvalue));
-            }
-            else
-            {
-                this.gmMeasurementCollection.insert(this.getMeasurementObject(id, projectId, fkDataSeriesId, measDateUtc, measDateSite, measvalue));
-            }
-        
+        if (this.primaryIdAutoIncrement)
+        {
+            this.gmMeasurementCollection.insert(this.getMeasurementObject(projectId, fkDataSeriesId, measDateUtc, measDateSite, measvalue));
+        }
+        else
+        {
+            this.gmMeasurementCollection.insert(this.getMeasurementObject(id, projectId, fkDataSeriesId, measDateUtc, measDateSite, measvalue));
+        }
 
     }
 
+    @Deprecated
     private BasicDBObject getMeasurementObject(long id, int projectId, long fkDataSeriesId, Date measDateUtc, Date measDateSite, double measvalue)
     {
         BasicDBObject measureementDocument = new BasicDBObject();
@@ -278,28 +291,64 @@ public class MongoDBManager extends IStorageManager
         return measureementDocument;
     }
 
-	@Override
-	public void execCreateOperation(String content) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public void execCreateOperation(Object content)
+    {
+        Map<String, Object> contentMap = (HashMap<String, Object>) content;
 
-	@Override
-	public void execInsertOperation(String content) {
-		// TODO Auto-generated method stub
-		
-	}
+        String collectionName = (String) contentMap.get("collectionname");
+        List<String> indexNames = (ArrayList<String>) contentMap.get("collectionindex");
 
-	@Override
-	public void execSelectOperation(String content) {
-		// TODO Auto-generated method stub
-		
-	}
+        this.gmMeasurementCollection = irisitestdb.createCollection(collectionName, null);
 
-	@Override
-	public void execDeleteOperation(String content) {
-		// TODO Auto-generated method stub
-		
-	}
+        BasicDBObject indexObject = new BasicDBObject();
+        for (int i = 0; i < indexNames.size(); i++)
+        {
+            indexObject.append(indexNames.get(i), 1);
+        }
+
+        gmMeasurementCollection.ensureIndex(indexObject, "default_index");
+
+    }
+
+    @Override
+    public void execInsertOperation(Object content)
+    {
+        BasicDBObject insertObject = (BasicDBObject) content;
+
+        this.gmMeasurementCollection.insert(insertObject);
+
+    }
+
+    @Override
+    public void execSelectOperation(Object content)
+    {
+        DBCursor cursor = null;
+        cursor = this.gmMeasurementCollection.find((BasicDBObject) content);
+
+        try
+        {
+            while (cursor.hasNext())
+            {
+                DBObject resultObject = cursor.next();
+                resultObject.toString();
+            }
+
+            this.notifyObservers();
+
+        }
+        finally
+        {
+            cursor.close();
+        }
+
+    }
+
+    @Override
+    public void execDeleteOperation(Object content)
+    {
+        this.mongoClient.dropDatabase(dbName);
+    }
 
 }

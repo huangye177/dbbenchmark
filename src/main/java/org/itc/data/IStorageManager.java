@@ -36,7 +36,7 @@ public abstract class IStorageManager
         this.currentThreshold = 0.1;
     }
 
-    public abstract void initConnection(String connString, String username, String password);
+    public abstract void initConnection();
 
     public abstract void closeConnection();
 
@@ -55,16 +55,16 @@ public abstract class IStorageManager
     public abstract double getMeasurementDataSize();
 
     public abstract double getMeasurementDataIndexSize();
-    
+
     // --
-    
-    public abstract void execCreateOperation(String content);
-    
-    public abstract void execInsertOperation(String content);
-    
-    public abstract void execSelectOperation(String content);
-    
-    public abstract void execDeleteOperation(String content);
+
+    public abstract void execCreateOperation(Object content);
+
+    public abstract void execInsertOperation(Object content);
+
+    public abstract void execSelectOperation(Object content);
+
+    public abstract void execDeleteOperation(Object content);
 
     public void registerObserver(IObserver observer)
     {
@@ -78,19 +78,21 @@ public abstract class IStorageManager
     }
 
     public void notifyObservers()
-    {
-    }
+    {}
 
+    @Deprecated
     protected int getProjectId()
     {
         return this.generator.nextInt(this.amount_of_project);
     }
 
+    @Deprecated
     protected int getDataSeriesId()
     {
         return this.generator.nextInt(this.amount_of_dataseries);
     }
 
+    @Deprecated
     protected Date getMeasDate()
     {
         String julianDate = "2013" + this.generator.nextInt(this.amount_of_day_of_year_2013);
@@ -107,6 +109,7 @@ public abstract class IStorageManager
         }
     }
 
+    @Deprecated
     protected double getMeasValue()
     {
         return this.generator.nextDouble() * value_of_measurement;

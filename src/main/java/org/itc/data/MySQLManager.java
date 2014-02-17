@@ -21,15 +21,32 @@ public class MySQLManager extends IStorageManager
 
     private long amount_of_records = 0;
 
-    public MySQLManager()
-    {
+    private String dbConnString = "";
+    private String dbUserName = "";
+    private String dbPassword = "";
 
+    public MySQLManager(String... args)
+    {
+        if (args.length >= 1 && args[0] != null)
+        {
+            this.dbConnString = args[0];
+        }
+
+        if (args.length >= 2 && args[1] != null)
+        {
+            this.dbUserName = args[1];
+        }
+
+        if (args.length >= 3 && args[2] != null)
+        {
+            this.dbPassword = args[2];
+        }
     }
 
     @Override
-    public void initConnection(String connString, String username, String password)
+    public void initConnection()
     {
-        this.conn = MySQLConnectionManager.getDBConnection(connString, username, password);
+        this.conn = MySQLConnectionManager.getDBConnection(this.dbConnString, this.dbUserName, this.dbPassword);
         this.printDBMetaInfo();
     }
 
@@ -47,106 +64,105 @@ public class MySQLManager extends IStorageManager
 
         List<String> tableCreationSQL = new ArrayList<String>();
 
-            String createStr = null;
+        String createStr = null;
 
-            if (this.primaryIdAutoIncrement)
+        if (this.primaryIdAutoIncrement)
+        {
+            createStr = "CREATE TABLE `gm_std_measurements` (\n" +
+                    "  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n" +
+                    "  `project_id` int(11) DEFAULT NULL,\n" +
+                    "  `fkDataSeriesId` bigint(20) DEFAULT NULL,\n" +
+                    "  `measDateUtc` datetime DEFAULT NULL,\n" +
+                    "  `measDateSite` datetime DEFAULT NULL,\n" +
+                    "  `measvalue` double DEFAULT NULL,\n" +
+                    "  `refMeas` bit(1) DEFAULT NULL,\n" +
+                    "  `reliability` double DEFAULT NULL,\n" +
+                    "  PRIMARY KEY (`id`),\n" +
+                    // "  KEY `Index1` (`fkDataSeriesId`),\n" +
+                    "  KEY `Index2` (`fkDataSeriesId`,`measDateUtc`)\n" +
+                    // "  KEY `Index3` (`measDateUtc`)\n" +
+                    ") ENGINE=MyISAM DEFAULT CHARSET=utf8 \n";
+
+        }
+        else
+        {
+            createStr = "CREATE TABLE `gm_std_measurements` (\n" +
+                    "  `id` bigint(20) NOT NULL,\n" +
+                    "  `project_id` int(11) DEFAULT NULL,\n" +
+                    "  `fkDataSeriesId` bigint(20) DEFAULT NULL,\n" +
+                    "  `measDateUtc` datetime DEFAULT NULL,\n" +
+                    "  `measDateSite` datetime DEFAULT NULL,\n" +
+                    "  `measvalue` double DEFAULT NULL,\n" +
+                    "  `refMeas` bit(1) DEFAULT NULL,\n" +
+                    "  `reliability` double DEFAULT NULL,\n" +
+                    "  PRIMARY KEY (`id`),\n" +
+                    // "  KEY `Index1` (`fkDataSeriesId`),\n" +
+                    "  KEY `Index2` (`fkDataSeriesId`,`measDateUtc`)\n" +
+                    // "  KEY `Index3` (`measDateUtc`)\n" +
+                    ") ENGINE=MyISAM DEFAULT CHARSET=utf8 \n";
+
+        }
+
+        if (this.partition == 1)
+        {
+            createStr += ";";
+        }
+        else
+        {
+            /**************************************************
+             * Partition Id: id START
+             **************************************************/
+            createStr += "PARTITION BY RANGE (id) ( \n";
+            long chunckSize = this.amount_of_records / this.partition;
+            int partitionNumber = 0;
+            for (int j = 0; j < this.partition - 1; j++)
             {
-                createStr = "CREATE TABLE `gm_std_measurements` (\n" +
-                        "  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n" +
-                        "  `project_id` int(11) DEFAULT NULL,\n" +
-                        "  `fkDataSeriesId` bigint(20) DEFAULT NULL,\n" +
-                        "  `measDateUtc` datetime DEFAULT NULL,\n" +
-                        "  `measDateSite` datetime DEFAULT NULL,\n" +
-                        "  `measvalue` double DEFAULT NULL,\n" +
-                        "  `refMeas` bit(1) DEFAULT NULL,\n" +
-                        "  `reliability` double DEFAULT NULL,\n" +
-                        "  PRIMARY KEY (`id`),\n" +
-                        // "  KEY `Index1` (`fkDataSeriesId`),\n" +
-                        "  KEY `Index2` (`fkDataSeriesId`,`measDateUtc`)\n" +
-                        // "  KEY `Index3` (`measDateUtc`)\n" +
-                        ") ENGINE=MyISAM DEFAULT CHARSET=utf8 \n";
-
+                partitionNumber = j;
+                createStr += "PARTITION p" + partitionNumber +
+                        " VALUES LESS THAN (" + (chunckSize * (j + 1)) + "), \n";
             }
-            else
-            {
-                createStr = "CREATE TABLE `gm_std_measurements` (\n" +
-                        "  `id` bigint(20) NOT NULL,\n" +
-                        "  `project_id` int(11) DEFAULT NULL,\n" +
-                        "  `fkDataSeriesId` bigint(20) DEFAULT NULL,\n" +
-                        "  `measDateUtc` datetime DEFAULT NULL,\n" +
-                        "  `measDateSite` datetime DEFAULT NULL,\n" +
-                        "  `measvalue` double DEFAULT NULL,\n" +
-                        "  `refMeas` bit(1) DEFAULT NULL,\n" +
-                        "  `reliability` double DEFAULT NULL,\n" +
-                        "  PRIMARY KEY (`id`),\n" +
-                        // "  KEY `Index1` (`fkDataSeriesId`),\n" +
-                        "  KEY `Index2` (`fkDataSeriesId`,`measDateUtc`)\n" +
-                        // "  KEY `Index3` (`measDateUtc`)\n" +
-                        ") ENGINE=MyISAM DEFAULT CHARSET=utf8 \n";
+            createStr += "PARTITION p" + (partitionNumber + 1) +
+                    " VALUES LESS THAN MAXVALUE);";
 
-            }
+            /************************************
+             * Partition Id END
+             ***********************************/
 
-            if (this.partition == 1)
-            {
-                createStr += ";";
-            }
-            else
-            {
-                /**************************************************
-                 * Partition Id: id START
-                 **************************************************/
-                createStr += "PARTITION BY RANGE (id) ( \n";
-                long chunckSize = this.amount_of_records / this.partition;
-                int partitionNumber = 0;
-                for (int j = 0; j < this.partition - 1; j++)
-                {
-                    partitionNumber = j;
-                    createStr += "PARTITION p" + partitionNumber +
-                            " VALUES LESS THAN (" + (chunckSize * (j + 1)) + "), \n";
-                }
-                createStr += "PARTITION p" + (partitionNumber + 1) +
-                        " VALUES LESS THAN MAXVALUE);";
+            /****************************************************
+             * Partition Id: fkDataSeriesId, then NO PK allowed
+             ****************************************************/
+            // createStr = "CREATE TABLE `gm_std_measurements` (\n" +
+            // "  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n" +
+            // "  `project_id` int(11) DEFAULT NULL,\n" +
+            // "  `fkDataSeriesId` bigint(20) DEFAULT NULL,\n" +
+            // "  `measDateUtc` datetime DEFAULT NULL,\n" +
+            // "  `measDateSite` datetime DEFAULT NULL,\n" +
+            // "  `measvalue` double DEFAULT NULL,\n" +
+            // "  `refMeas` bit(1) DEFAULT NULL,\n" +
+            // "  `reliability` double DEFAULT NULL,\n" +
+            // "  KEY `Index_id` (`id`),\n" +
+            // "  KEY `Index2` (`fkDataSeriesId`,`measDateUtc`)\n" +
+            // ") ENGINE=MyISAM DEFAULT CHARSET=utf8 \n";
+            //
+            // createStr += "PARTITION BY RANGE (fkDataSeriesId) ( \n";
+            // long chunckSize = this.amount_of_dataseries / this.partition;
+            // int partitionNumber = 0;
+            // for (int j = 0; j < this.partition - 1; j++)
+            // {
+            // partitionNumber = j;
+            // createStr += "PARTITION p" + partitionNumber +
+            // " VALUES LESS THAN (" + (chunckSize * (j + 1)) + "), \n";
+            // }
+            // createStr += "PARTITION p" + (partitionNumber + 1) +
+            // " VALUES LESS THAN MAXVALUE);";
 
-                /************************************
-                 * Partition Id END
-                 ***********************************/
+            /************************************
+             * Partition fkDataSeriesId: END
+             ***********************************/
 
-                /****************************************************
-                 * Partition Id: fkDataSeriesId, then NO PK allowed
-                 ****************************************************/
-                // createStr = "CREATE TABLE `gm_std_measurements` (\n" +
-                // "  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n" +
-                // "  `project_id` int(11) DEFAULT NULL,\n" +
-                // "  `fkDataSeriesId` bigint(20) DEFAULT NULL,\n" +
-                // "  `measDateUtc` datetime DEFAULT NULL,\n" +
-                // "  `measDateSite` datetime DEFAULT NULL,\n" +
-                // "  `measvalue` double DEFAULT NULL,\n" +
-                // "  `refMeas` bit(1) DEFAULT NULL,\n" +
-                // "  `reliability` double DEFAULT NULL,\n" +
-                // "  KEY `Index_id` (`id`),\n" +
-                // "  KEY `Index2` (`fkDataSeriesId`,`measDateUtc`)\n" +
-                // ") ENGINE=MyISAM DEFAULT CHARSET=utf8 \n";
-                //
-                // createStr += "PARTITION BY RANGE (fkDataSeriesId) ( \n";
-                // long chunckSize = this.amount_of_dataseries / this.partition;
-                // int partitionNumber = 0;
-                // for (int j = 0; j < this.partition - 1; j++)
-                // {
-                // partitionNumber = j;
-                // createStr += "PARTITION p" + partitionNumber +
-                // " VALUES LESS THAN (" + (chunckSize * (j + 1)) + "), \n";
-                // }
-                // createStr += "PARTITION p" + (partitionNumber + 1) +
-                // " VALUES LESS THAN MAXVALUE);";
+        }
 
-                /************************************
-                 * Partition fkDataSeriesId: END
-                 ***********************************/
-
-            }
-
-            tableCreationSQL.add(createStr);
-        
+        tableCreationSQL.add(createStr);
 
         /*
          * create one or multi-sharding tables
@@ -290,10 +306,9 @@ public class MySQLManager extends IStorageManager
         int dsId = this.getDataSeriesId();
 
         String selectStr = "";
-        
-            selectStr = "SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements " +
-                    "WHERE fkDataSeriesId=?;";
-        
+
+        selectStr = "SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements " +
+                "WHERE fkDataSeriesId=?;";
 
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
@@ -415,10 +430,8 @@ public class MySQLManager extends IStorageManager
     {
         List<String> deleteStrList = new ArrayList<String>();
 
-        
-            String deleteStrstr = "DROP TABLE gm_std_measurements;";
-            deleteStrList.add(deleteStrstr);
-        
+        String deleteStrstr = "DROP TABLE gm_std_measurements;";
+        deleteStrList.add(deleteStrstr);
 
         /*
          * delete one or multi- created tables/table-shards
@@ -588,55 +601,55 @@ public class MySQLManager extends IStorageManager
      * private util methods
      ************************/
 
+    @Deprecated
     private void insertMeasurement(long id, int projectId, long fkDataSeriesId, Date measDateUtc, Date measDateSite, double measvalue)
     {
         String insertStr = null;
 
-            if (this.primaryIdAutoIncrement)
-            {
-                insertStr = "INSERT INTO `gm_std_measurements`\n" +
-                        "(`project_id`,\n" +
-                        "`fkDataSeriesId`,\n" +
-                        "`measDateUtc`,\n" +
-                        "`measDateSite`,\n" +
-                        "`measvalue`,\n" +
-                        "`refMeas`,\n" +
-                        "`reliability`)\n" +
-                        "VALUES\n" +
-                        "(\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "0,\n" +
-                        "1.0\n" +
-                        ");";
-            }
-            else
-            {
-                insertStr = "INSERT INTO `gm_std_measurements`\n" +
-                        "(`id`,\n" +
-                        "`project_id`,\n" +
-                        "`fkDataSeriesId`,\n" +
-                        "`measDateUtc`,\n" +
-                        "`measDateSite`,\n" +
-                        "`measvalue`,\n" +
-                        "`refMeas`,\n" +
-                        "`reliability`)\n" +
-                        "VALUES\n" +
-                        "(\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "?,\n" +
-                        "0,\n" +
-                        "1.0\n" +
-                        ");";
-            }
-        
+        if (this.primaryIdAutoIncrement)
+        {
+            insertStr = "INSERT INTO `gm_std_measurements`\n" +
+                    "(`project_id`,\n" +
+                    "`fkDataSeriesId`,\n" +
+                    "`measDateUtc`,\n" +
+                    "`measDateSite`,\n" +
+                    "`measvalue`,\n" +
+                    "`refMeas`,\n" +
+                    "`reliability`)\n" +
+                    "VALUES\n" +
+                    "(\n" +
+                    "?,\n" +
+                    "?,\n" +
+                    "?,\n" +
+                    "?,\n" +
+                    "?,\n" +
+                    "0,\n" +
+                    "1.0\n" +
+                    ");";
+        }
+        else
+        {
+            insertStr = "INSERT INTO `gm_std_measurements`\n" +
+                    "(`id`,\n" +
+                    "`project_id`,\n" +
+                    "`fkDataSeriesId`,\n" +
+                    "`measDateUtc`,\n" +
+                    "`measDateSite`,\n" +
+                    "`measvalue`,\n" +
+                    "`refMeas`,\n" +
+                    "`reliability`)\n" +
+                    "VALUES\n" +
+                    "(\n" +
+                    "?,\n" +
+                    "?,\n" +
+                    "?,\n" +
+                    "?,\n" +
+                    "?,\n" +
+                    "?,\n" +
+                    "0,\n" +
+                    "1.0\n" +
+                    ");";
+        }
 
         PreparedStatement preparedStatement = null;
 
@@ -681,6 +694,7 @@ public class MySQLManager extends IStorageManager
         }
     }
 
+    @Deprecated
     private void insertMeasurement(HashMap<Integer, List<String>> toExecuteInsertStatments)
     {
         // System.out.println("INSERT BATCH COMMIT: " + new Date());
@@ -776,16 +790,17 @@ public class MySQLManager extends IStorageManager
         return new java.sql.Date(date.getTime());
     }
 
-	@Override
-	public void execCreateOperation(String content) {
-		
-		Statement stmt = null;
+    @Override
+    public void execCreateOperation(Object content)
+    {
+
+        Statement stmt = null;
 
         try
         {
             stmt = this.conn.createStatement();
 
-            stmt.executeUpdate(content);
+            stmt.executeUpdate((String) content);
         }
         catch (SQLException e)
         {
@@ -803,17 +818,17 @@ public class MySQLManager extends IStorageManager
                 e.printStackTrace();
             }
         }
-	}
+    }
 
-	@Override
-	public void execInsertOperation(String content) {
-		
-		PreparedStatement preparedStatement = null;
+    @Override
+    public void execInsertOperation(Object content)
+    {
+
+        PreparedStatement preparedStatement = null;
 
         try
         {
-            preparedStatement = this.conn.prepareStatement(content);
-            
+            preparedStatement = this.conn.prepareStatement((String) content);
 
             preparedStatement.executeUpdate();
         }
@@ -833,17 +848,18 @@ public class MySQLManager extends IStorageManager
                 e.printStackTrace();
             }
         }
-	}
+    }
 
-	@Override
-	public void execSelectOperation(String content) {
-		
-		PreparedStatement preparedStatement = null;
+    @Override
+    public void execSelectOperation(Object content)
+    {
+
+        PreparedStatement preparedStatement = null;
         ResultSet rs = null;
 
         try
         {
-            preparedStatement = this.conn.prepareStatement(content);
+            preparedStatement = this.conn.prepareStatement((String) content);
 
             /*
              * Set query cursor
@@ -875,18 +891,19 @@ public class MySQLManager extends IStorageManager
                 e.printStackTrace();
             }
         }
-	}
+    }
 
-	@Override
-	public void execDeleteOperation(String content) {
-		
-		Statement stmt = null;
+    @Override
+    public void execDeleteOperation(Object content)
+    {
+
+        Statement stmt = null;
 
         try
         {
             stmt = this.conn.createStatement();
 
-            stmt.executeUpdate(content);
+            stmt.executeUpdate((String) content);
         }
         catch (SQLException e)
         {
@@ -904,6 +921,6 @@ public class MySQLManager extends IStorageManager
                 e.printStackTrace();
             }
         }
-	}
+    }
 
 }

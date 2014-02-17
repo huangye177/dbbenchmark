@@ -2,28 +2,103 @@ package org.itc.model;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
-public class InteroperatorGeomoniBasic extends IDataInteroperator {
+import com.mongodb.BasicDBObject;
 
-	private Random generator = new Random();
-	private SimpleDateFormat format = new SimpleDateFormat("yyyyD");
-	
-	final private int amount_of_day_of_year_2014 = 365;
-	final protected int amount_of_dataseries = 1000;
+public class InteroperatorGeomoniBasic extends IDataInteroperator
+{
+
+    private Random generator = new Random();
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyD");
+    private SimpleDateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+    final private int amount_of_day_of_year_2014 = 365;
+    final protected int amount_of_dataseries = 1000;
     final private int amount_of_project = 1000;
     final private int value_of_measurement = 1000;
-    
-	@Override
-	public String interoperate(String originalSQL, DBType dbtype,
-			OperationType operType) {
-		
-		return null;
-	}
 
-	
-	protected int getProjectId()
+    @Override
+    public Object interoperate(Object originalContent, DBType dbtype,
+            OperationType operType)
+    {
+        if (DBType.MYSQL.equals(dbtype))
+        {
+            if (OperationType.INSERT.equals(operType))
+            {
+                return this.interoperateMySQLInsert((String) originalContent);
+            }
+            else
+            {
+                return originalContent;
+            }
+
+        }
+        else if (DBType.MONGODB.equals(dbtype))
+        {
+            if (OperationType.INSERT.equals(operType))
+            {
+                return this.interoperateMongoDBInsert(originalContent);
+            }
+            else if (OperationType.SELECT.equals(operType))
+            {
+                return this.interoperateMongoDBSelect(originalContent);
+            }
+            else
+            {
+                return originalContent;
+            }
+        }
+        else
+        {
+            return originalContent;
+        }
+    }
+
+    private String interoperateMySQLInsert(String statement)
+    {
+        String var = "";
+
+        var = statement.replaceFirst("\\?", String.valueOf(this.getProjectId()))
+                .replaceFirst("\\?", String.valueOf(this.getDataSeriesId()))
+                .replaceFirst("\\?", "\'" + this.datetimeFormat.format(this.getMeasDate()) + "\'")
+                .replaceFirst("\\?", "\'" + this.datetimeFormat.format(this.getMeasDate()) + "\'")
+                .replaceFirst("\\?", String.valueOf(this.getMeasValue()));
+
+        return var;
+    }
+
+    private BasicDBObject interoperateMongoDBInsert(Object statement)
+    {
+        @SuppressWarnings("unchecked")
+        List<String> inputArray = (ArrayList<String>) statement;
+
+        BasicDBObject insertObject = new BasicDBObject();
+
+        insertObject.append(inputArray.get(0), this.getProjectId());
+        insertObject.append(inputArray.get(1), this.getDataSeriesId());
+        insertObject.append(inputArray.get(2), this.datetimeFormat.format(this.getMeasDate()));
+        insertObject.append(inputArray.get(3), this.datetimeFormat.format(this.getMeasDate()));
+        insertObject.append(inputArray.get(4), this.getMeasValue());
+        insertObject.append(inputArray.get(5), false);
+        insertObject.append(inputArray.get(6), 1.0);
+
+        return insertObject;
+    }
+
+    private BasicDBObject interoperateMongoDBSelect(Object statement)
+    {
+        BasicDBObject insertObject = new BasicDBObject();
+
+        insertObject.append((String) statement, this.getDataSeriesId());
+
+        return insertObject;
+    }
+
+    protected int getProjectId()
     {
         return this.generator.nextInt(this.amount_of_project);
     }
@@ -39,7 +114,7 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator {
 
         try
         {
-            Date parseDate = this.format.parse(julianDate);
+            Date parseDate = this.dateFormat.parse(julianDate);
             return parseDate;
         }
         catch (ParseException e)

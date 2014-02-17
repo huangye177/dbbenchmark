@@ -8,7 +8,7 @@ public class ScenarioStatement
     private String operationtype = "";
     private int repeat = 1;
     private String interoperate = "";
-    private String content = "";
+    private Object content = "";
 
     public ScenarioStatement()
     {
