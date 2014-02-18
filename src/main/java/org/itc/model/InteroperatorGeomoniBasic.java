@@ -4,7 +4,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.mongodb.BasicDBObject;
@@ -71,10 +73,11 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator
         return var;
     }
 
-    private BasicDBObject interoperateMongoDBInsert(Object statement)
+    @SuppressWarnings("unchecked")
+    private BasicDBObject interoperateMongoDBInsert(Object content)
     {
-        @SuppressWarnings("unchecked")
-        List<String> inputArray = (ArrayList<String>) statement;
+        Map<String, Object> contentMap = (HashMap<String, Object>) content;
+        List<String> inputArray = (ArrayList<String>) contentMap.get("document");
 
         BasicDBObject insertObject = new BasicDBObject();
 
@@ -89,11 +92,15 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator
         return insertObject;
     }
 
-    private BasicDBObject interoperateMongoDBSelect(Object statement)
+    @SuppressWarnings("unchecked")
+    private BasicDBObject interoperateMongoDBSelect(Object content)
     {
+        Map<String, Object> contentMap = (HashMap<String, Object>) content;
+        List<String> inputArray = (ArrayList<String>) contentMap.get("document");
+
         BasicDBObject insertObject = new BasicDBObject();
 
-        insertObject.append((String) statement, this.getDataSeriesId());
+        insertObject.append(inputArray.get(0), this.getDataSeriesId());
 
         return insertObject;
     }

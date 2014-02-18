@@ -17,6 +17,7 @@ import org.itc.model.DBFactory;
 import org.itc.model.DBType;
 import org.itc.model.InteroperateType;
 import org.itc.model.OperationType;
+import org.itc.model.ScenarioType;
 import org.itc.scenario.IObserver;
 import org.itc.scenario.JSONSettingReaderWriter;
 import org.itc.scenario.ScenarioStatement;
@@ -65,6 +66,13 @@ public class Trunk
 
         for (ScenarioUnit su : scenarios.getScenarioUnits())
         {
+            String scenarioName = su.getScenarioName();
+
+            if (ScenarioType.COMMENT.equals(ScenarioType.valueOf(scenarioName)))
+            {
+                continue;
+            }
+
             this.dateFormat.setTimeZone(TimeZone.getTimeZone(su.getTimeZone()));
             Calendar cal = Calendar.getInstance();
 
@@ -80,8 +88,8 @@ public class Trunk
 
             for (ScenarioStatement stat : su.getScenarioStatement())
             {
-                String info = "\n[---START---] " + su.getDatabaseType() + " DB " + stat.getOperationtype() + " scenario started at: "
-                        + dateFormat.format(cal.getTime());
+                String info = "\n[---START Scenario " + scenarioName + "---] " + su.getDatabaseType() + " DB " + stat.getOperationtype()
+                        + " scenario started at: " + dateFormat.format(cal.getTime());
                 long startTime = System.currentTimeMillis();
 
                 this.staticObserver.update(info);
@@ -193,8 +201,8 @@ public class Trunk
                 // double sizeKB = dbManager.getMeasurementDataSize();
                 // double indexKB = dbManager.getMeasurementDataIndexSize();
 
-                info = "\n[---DONE---] SCENARIO-" + stat.getOperationtype() + " *END: (" + dbType + ") Execution duration: " + durationSecond + " seconds ("
-                        + durationMillis + " milliseocnds)";
+                info = "\n[---DONE " + scenarioName + "---] SCENARIO-" + stat.getOperationtype() + " *END: (" + dbType + ") Execution duration: "
+                        + durationSecond + " seconds (" + durationMillis + " milliseocnds)";
                 // info += "\n" + dbType + " DB SIZE: " + (sizeKB / 1024) +
                 // "MB (" + (sizeKB / 1024 / 1024) + " GB /" + sizeKB + " KB)";
                 // info += "\n" + dbType + " DB INDEX SIZE: " + (indexKB / 1024)

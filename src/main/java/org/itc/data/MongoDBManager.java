@@ -300,7 +300,7 @@ public class MongoDBManager extends IStorageManager
         String collectionName = (String) contentMap.get("collectionname");
         List<String> indexNames = (ArrayList<String>) contentMap.get("collectionindex");
 
-        this.gmMeasurementCollection = irisitestdb.createCollection(collectionName, null);
+        DBCollection collection = irisitestdb.createCollection(collectionName, null);
 
         BasicDBObject indexObject = new BasicDBObject();
         for (int i = 0; i < indexNames.size(); i++)
@@ -308,24 +308,38 @@ public class MongoDBManager extends IStorageManager
             indexObject.append(indexNames.get(i), 1);
         }
 
-        gmMeasurementCollection.ensureIndex(indexObject, "default_index");
+        collection.ensureIndex(indexObject, "default_index");
 
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void execInsertOperation(Object content)
     {
-        BasicDBObject insertObject = (BasicDBObject) content;
+        Map<String, Object> contentMap = (HashMap<String, Object>) content;
 
-        this.gmMeasurementCollection.insert(insertObject);
+        String collectionName = (String) contentMap.get("collectionname");
+        BasicDBObject document = (BasicDBObject) contentMap.get("document");
+
+        DBCollection collection = irisitestdb.getCollection(collectionName);
+
+        collection.insert(document);
 
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void execSelectOperation(Object content)
     {
+        Map<String, Object> contentMap = (HashMap<String, Object>) content;
+
+        String collectionName = (String) contentMap.get("collectionname");
+        BasicDBObject document = (BasicDBObject) contentMap.get("document");
+
+        DBCollection collection = irisitestdb.getCollection(collectionName);
+
         DBCursor cursor = null;
-        cursor = this.gmMeasurementCollection.find((BasicDBObject) content);
+        cursor = collection.find(document);
 
         try
         {
@@ -346,9 +360,25 @@ public class MongoDBManager extends IStorageManager
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void execDeleteOperation(Object content)
     {
-        this.mongoClient.dropDatabase(dbName);
+        Map<String, Object> contentMap = (HashMap<String, Object>) content;
+
+        String collectionName = (String) contentMap.get("collectionname");
+        List<BasicDBObject> documents = (ArrayList<BasicDBObject>) contentMap.get("document");
+
+        DBCollection collection = irisitestdb.getCollection(collectionName);
+
+        if (collection != null && (documents == null || documents.size() == 0))
+        {
+            collection.drop();
+        } else if (collection != null && documents != null && documents.size() != 0) {
+            for(BasicDBObject doc : documents) {
+                collection.remove(doc);
+            }
+        }
+
     }
 
 }

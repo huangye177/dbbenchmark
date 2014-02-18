@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class ScenarioUnit
 {
+    private String scenarioName = "";
     private String timeZone = "CET";
 
     private int numOfInsertThread = 1;
