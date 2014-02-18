@@ -17,7 +17,6 @@ import org.itc.model.DBFactory;
 import org.itc.model.DBType;
 import org.itc.model.InteroperateType;
 import org.itc.model.OperationType;
-import org.itc.model.ScenarioType;
 import org.itc.scenario.IObserver;
 import org.itc.scenario.JSONSettingReaderWriter;
 import org.itc.scenario.ScenarioStatement;
@@ -68,7 +67,7 @@ public class Trunk
         {
             String scenarioName = su.getScenarioName();
 
-            if (ScenarioType.COMMENT.equals(ScenarioType.valueOf(scenarioName)))
+            if ("COMMENT".equals(scenarioName))
             {
                 continue;
             }

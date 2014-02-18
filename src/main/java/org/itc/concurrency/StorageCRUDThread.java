@@ -53,11 +53,11 @@ public class StorageCRUDThread extends Thread
 
         this.executionReady = false;
 
-        Object interoperatedObject = null;
-
         // NOTICE: DB connection should be managed out of thread
         for (int i = 0; i < numInsertPerThread; i++)
         {
+            Object interoperatedObject = null;
+
             if (interoperatorType != null)
             {
                 IDataInteroperator interoperator = DataInteroperatorFactory.buildDataInteroperator(interoperatorType);

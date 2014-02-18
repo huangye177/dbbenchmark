@@ -74,7 +74,7 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator
     }
 
     @SuppressWarnings("unchecked")
-    private BasicDBObject interoperateMongoDBInsert(Object content)
+    private Object interoperateMongoDBInsert(Object content)
     {
         Map<String, Object> contentMap = (HashMap<String, Object>) content;
         List<String> inputArray = (ArrayList<String>) contentMap.get("document");
@@ -89,20 +89,28 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator
         insertObject.append(inputArray.get(5), false);
         insertObject.append(inputArray.get(6), 1.0);
 
-        return insertObject;
+        // create the to-return result
+        Map<String, Object> returnContentMap = new HashMap<String, Object>(contentMap);
+        returnContentMap.put("document", insertObject);
+
+        return returnContentMap;
     }
 
     @SuppressWarnings("unchecked")
-    private BasicDBObject interoperateMongoDBSelect(Object content)
+    private Object interoperateMongoDBSelect(Object content)
     {
         Map<String, Object> contentMap = (HashMap<String, Object>) content;
         List<String> inputArray = (ArrayList<String>) contentMap.get("document");
 
-        BasicDBObject insertObject = new BasicDBObject();
+        BasicDBObject selectObject = new BasicDBObject();
 
-        insertObject.append(inputArray.get(0), this.getDataSeriesId());
+        selectObject.append(inputArray.get(0), this.getDataSeriesId());
 
-        return insertObject;
+        // create the to-return result
+        Map<String, Object> returnContentMap = new HashMap<String, Object>(contentMap);
+        returnContentMap.put("document", selectObject);
+
+        return returnContentMap;
     }
 
     protected int getProjectId()

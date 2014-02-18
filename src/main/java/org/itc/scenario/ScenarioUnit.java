@@ -15,7 +15,6 @@ public class ScenarioUnit
     private int numOfQueryThread = 1;
 
     private String databaseType = "";
-    private String databaseDriver = "";
     private String databaseConnection = "";
     private String databaseUsername = "";
     private String databasePassword = "";

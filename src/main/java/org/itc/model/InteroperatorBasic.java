@@ -53,10 +53,10 @@ public class InteroperatorBasic extends IDataInteroperator
     }
 
     @SuppressWarnings("unchecked")
-    private Object injectRandomIntIntoDocument(Object content)
+    private Object injectRandomIntIntoDocument(Object originalContent)
     {
-        Map<String, Object> contentMap = (HashMap<String, Object>) content;
-        List<String> documents = (ArrayList<String>) contentMap.get("document");
+        Map<String, Object> originalContentMap = (HashMap<String, Object>) originalContent;
+        List<String> documents = (ArrayList<String>) originalContentMap.get("document");
 
         BasicDBObject dbObject = new BasicDBObject();
         for (String doc : documents)
@@ -64,9 +64,11 @@ public class InteroperatorBasic extends IDataInteroperator
             dbObject.append(doc, this.getRandomDouble());
         }
 
-        contentMap.put("document", dbObject);
+        // create the to-return result
+        Map<String, Object> returnContentMap = new HashMap<String, Object>(originalContentMap);
+        returnContentMap.put("document", dbObject);
 
-        return content;
+        return returnContentMap;
     }
 
     protected int getRandomDouble()

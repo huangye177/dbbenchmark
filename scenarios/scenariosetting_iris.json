@@ -6,7 +6,6 @@
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
-            "databaseDriver": "com.mysql.jdbc.Driver",
             "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",
             "databaseUsername": "iristestdb",
             "databasePassword": "iristestdb",
@@ -27,7 +26,6 @@
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
-            "databaseDriver": "com.mysql.jdbc.Driver",
             "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",  
             "databaseUsername": "iristestdb",
             "databasePassword": "iristestdb",
@@ -36,25 +34,61 @@
             		"operationtype": "DELETE",
             		"repeat": 1,
             		"interoperate": null,
-            		"content": "DROP TABLE IF EXISTS `gm_std_measurements`;"
+            		"content": "DROP TABLE IF EXISTS `gm_std_measurements_myisam`;"
             	},
             	{
             		"operationtype": "CREATE",
             		"repeat": 1,
             		"interoperate": null,
-            		"content": " CREATE TABLE `gm_std_measurements` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `Index2` (`fkDataSeriesId`,`measDateUtc`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8 "
+            		"content": " CREATE TABLE `gm_std_measurements_myisam` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `Index2` (`fkDataSeriesId`,`measDateUtc`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8 "
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 5000000,
+            		"repeat": 10,
             		"interoperate": "GEOMONI_BASIC",
-            		"content": " INSERT INTO `gm_std_measurements` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
+            		"content": " INSERT INTO `gm_std_measurements_myisam` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
             	},
             	{
             		"operationtype": "SELECT",
-            		"repeat": 1000000,
+            		"repeat": 1000,
             		"interoperate": null,
-            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements WHERE fkDataSeriesId=FLOOR(RAND() * 1000); "
+            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_myisam WHERE fkDataSeriesId=FLOOR(RAND() * 1000); "
+            	}
+            ]
+        },
+        {
+            "timeZone": "CET",
+            "scenarioName": "MYSQL InnoDB",
+            "numOfInsertThread": 1,
+            "numOfQueryThread": 1,
+            "databaseType": "MYSQL",
+            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",  
+            "databaseUsername": "iristestdb",
+            "databasePassword": "iristestdb",
+            "scenarioStatement" : [
+            	{
+            		"operationtype": "DELETE",
+            		"repeat": 1,
+            		"interoperate": null,
+            		"content": "DROP TABLE IF EXISTS `gm_std_measurements_innodb`;"
+            	},
+            	{
+            		"operationtype": "CREATE",
+            		"repeat": 1,
+            		"interoperate": null,
+            		"content": " CREATE TABLE `gm_std_measurements_innodb` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `Index2` (`fkDataSeriesId`,`measDateUtc`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 "
+            	},
+            	{
+            		"operationtype": "INSERT",
+            		"repeat": 10,
+            		"interoperate": "GEOMONI_BASIC",
+            		"content": " INSERT INTO `gm_std_measurements_innodb` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
+            	},
+            	{
+            		"operationtype": "SELECT",
+            		"repeat": 1000,
+            		"interoperate": null,
+            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_innodb WHERE fkDataSeriesId=FLOOR(RAND() * 1000); "
             	}
             ]
         },
@@ -64,7 +98,6 @@
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
-            "databaseDriver": "com.mysql.jdbc.Driver",
             "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",
             "databaseUsername": "iristestdb",
             "databasePassword": "iristestdb",
@@ -73,25 +106,25 @@
             		"operationtype": "DELETE",
             		"repeat": 1,
             		"interoperate": null,
-            		"content": "DROP TABLE IF EXISTS `gm_std_measurements_toku`;"
+            		"content": "DROP TABLE IF EXISTS `gm_std_measurements_tokudb`;"
             	},
             	{
             		"operationtype": "CREATE",
             		"repeat": 1,
             		"interoperate": null,
-            		"content": " CREATE TABLE `gm_std_measurements_toku` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `Index2` (`fkDataSeriesId`,`measDateUtc`) ) ENGINE=TokuDB DEFAULT CHARSET=utf8 "
+            		"content": " CREATE TABLE `gm_std_measurements_tokudb` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `Index2` (`fkDataSeriesId`,`measDateUtc`) ) ENGINE=TokuDB DEFAULT CHARSET=utf8 "
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 5000000,
+            		"repeat": 10,
             		"interoperate": "GEOMONI_BASIC",
-            		"content": " INSERT INTO `gm_std_measurements_toku` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
+            		"content": " INSERT INTO `gm_std_measurements_tokudb` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
             	},
             	{
             		"operationtype": "SELECT",
-            		"repeat": 1000000,
+            		"repeat": 1000,
             		"interoperate": null,
-            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_toku WHERE fkDataSeriesId=FLOOR(RAND() * 1000); "
+            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_tokudb WHERE fkDataSeriesId=FLOOR(RAND() * 1000); "
             	}
             ]
         },
@@ -101,7 +134,6 @@
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "databaseType": "MONGODB",
-            "databaseDriver": null,
             "databaseConnection": "iristestdb",
             "databaseUsername": null,
             "databasePassword": null,
@@ -126,7 +158,7 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 5000000,
+            		"repeat": 10,
             		"interoperate": "GEOMONI_BASIC",
             		"content": {
                 	    "collectionname": "gm_std_measurements",
@@ -135,7 +167,7 @@
             	},
                 {
                 	"operationtype": "SELECT",
-            		"repeat": 1000000,
+            		"repeat": 1000,
             		"interoperate": "GEOMONI_BASIC",
             		"content": {
                 	    "collectionname": "gm_std_measurements",
