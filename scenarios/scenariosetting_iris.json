@@ -44,7 +44,7 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 10,
+            		"repeat": 1000,
             		"interoperate": "GEOMONI_BASIC",
             		"content": " INSERT INTO `gm_std_measurements_myisam` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
             	},
@@ -80,7 +80,7 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 10,
+            		"repeat": 1000,
             		"interoperate": "GEOMONI_BASIC",
             		"content": " INSERT INTO `gm_std_measurements_innodb` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
             	},
@@ -116,7 +116,7 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 10,
+            		"repeat": 1000,
             		"interoperate": "GEOMONI_BASIC",
             		"content": " INSERT INTO `gm_std_measurements_tokudb` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
             	},
@@ -158,7 +158,7 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 10,
+            		"repeat": 1000,
             		"interoperate": "GEOMONI_BASIC",
             		"content": {
                 	    "collectionname": "gm_std_measurements",

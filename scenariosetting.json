@@ -44,7 +44,7 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 10,
+            		"repeat": 1000,
             		"interoperate": null,
             		"content": " INSERT INTO `testtable_myisam` (`value1`, `value2`) VALUES (FLOOR(RAND() * 1000), FLOOR(RAND() * 1000)); "
             	},
@@ -80,7 +80,7 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 10,
+            		"repeat": 1000,
             		"interoperate": null,
             		"content": " INSERT INTO `testtable_innodb` (`value1`, `value2`) VALUES (FLOOR(RAND() * 1000), FLOOR(RAND() * 1000)); "
             	},
@@ -116,7 +116,7 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 10,
+            		"repeat": 1000,
             		"interoperate": null,
             		"content": " INSERT INTO `testtable_tokudb` (`value1`, `value2`) VALUES (FLOOR(RAND() * 1000), FLOOR(RAND() * 1000)); "
             	},
@@ -158,7 +158,7 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 10,
+            		"repeat": 1000,
             		"interoperate": "BASIC",
             		"content": {
                 	    "collectionname": "testcollection",
