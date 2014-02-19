@@ -5,10 +5,12 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class MySQLManager extends IStorageManager
 {
     private Connection conn = null;
+    private Statement stmt = null;
 
     private String dbConnString = "";
     private String dbUserName = "";
@@ -36,37 +38,50 @@ public class MySQLManager extends IStorageManager
     public void initConnection()
     {
         this.conn = MySQLConnectionManager.getDBConnection(this.dbConnString, this.dbUserName, this.dbPassword);
+        try
+        {
+            this.stmt = this.conn.createStatement();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
         this.printDBMetaInfo();
     }
 
     @Override
     public void closeConnection()
     {
+        if (this.stmt != null)
+        {
+            try
+            {
+                this.stmt.close();
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        this.stmt = null;
         MySQLConnectionManager.closeDBConnection(this.conn);
     }
 
     @Override
     public void execSelectOperation(Object content)
     {
-
-        PreparedStatement preparedStatement = null;
         ResultSet rs = null;
 
         try
         {
-            preparedStatement = this.conn.prepareStatement((String) content);
-
-            /*
-             * Set query cursor
-             */
-            preparedStatement.setFetchSize(100);
-
-            rs = preparedStatement.executeQuery();
+            rs = this.stmt.executeQuery((String) content);
 
             while (rs.next())
             {
                 rs.toString();
             }
+
             this.notifyObservers();
         }
         catch (SQLException e)
@@ -79,7 +94,6 @@ public class MySQLManager extends IStorageManager
             try
             {
                 rs.close();
-                preparedStatement.close();
             }
             catch (SQLException e)
             {
