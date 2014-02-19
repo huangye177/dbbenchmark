@@ -91,6 +91,90 @@
             		"content": " SELECT id, value1, value2 FROM testtable_innodb WHERE value1=(FLOOR(RAND() * 1000)); "
             	}
             ]
+        },
+        {
+            "timeZone": "CET",
+            "scenarioName": "MYSQL TokuDB",
+            "numOfInsertThread": 1,
+            "numOfQueryThread": 1,
+            "databaseType": "MYSQL",
+            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/testdb",
+            "databaseUsername": "testdb",
+            "databasePassword": "testdb",
+            "scenarioStatement" : [
+            	{
+            		"operationtype": "DELETE",
+            		"repeat": 1,
+            		"interoperate": null,
+            		"content": "DROP TABLE IF EXISTS `testtable_tokudb`;"
+            	},
+            	{
+            		"operationtype": "CREATE",
+            		"repeat": 1,
+            		"interoperate": null,
+            		"content": " CREATE TABLE `testtable_tokudb` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `value1` INT DEFAULT NULL, `value2` INT DEFAULT NULL, PRIMARY KEY (`id`), KEY `index1` (`value1`)) ENGINE=TokuDB DEFAULT CHARSET=utf8; "
+            	},
+            	{
+            		"operationtype": "INSERT",
+            		"repeat": 1000,
+            		"interoperate": null,
+            		"content": " INSERT INTO `testtable_tokudb` (`value1`, `value2`) VALUES (FLOOR(RAND() * 1000), FLOOR(RAND() * 1000)); "
+            	},
+            	{
+            		"operationtype": "SELECT",
+            		"repeat": 1000,
+            		"interoperate": null,
+            		"content": " SELECT id, value1, value2 FROM testtable_tokudb WHERE value1=(FLOOR(RAND() * 1000)); "
+            	}
+            ]
+        },
+        {
+            "timeZone": "CET",
+            "scenarioName": "MongoDB",
+            "numOfInsertThread": 1,
+            "numOfQueryThread": 1,
+            "databaseType": "MONGODB",
+            "databaseConnection": "testdb",
+            "databaseUsername": null,
+            "databasePassword": null,
+            "scenarioStatement" : [
+                {
+                    "operationtype": "DELETE",
+            		"repeat": 1,
+            		"interoperate": "BASIC",
+            		"content": {
+                	    "collectionname": "testcollection",
+                        "document": null
+            		}
+            	},
+            	{
+            		"operationtype": "CREATE",
+            		"repeat": 1,
+            		"interoperate": "BASIC",
+            		"content": {
+                	    "collectionname": "testcollection",
+                        "collectionindex": ["value1"]
+            		}
+            	},
+            	{
+            		"operationtype": "INSERT",
+            		"repeat": 1000,
+            		"interoperate": "BASIC",
+            		"content": {
+                	    "collectionname": "testcollection",
+                        "document": ["value1", "value2"]
+            		}
+            	},
+                {
+                	"operationtype": "SELECT",
+            		"repeat": 1000,
+            		"interoperate": "BASIC",
+            		"content": {
+                	    "collectionname": "testcollection",
+                        "document": ["value1"]
+            		}
+            	}
+            ]
         }
     ]
 }
