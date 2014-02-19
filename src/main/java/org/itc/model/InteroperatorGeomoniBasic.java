@@ -33,6 +33,10 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator
             {
                 return this.interoperateMySQLInsert((String) originalContent);
             }
+            else if (OperationType.SELECT.equals(operType))
+            {
+                return this.interoperateMySQLSelect((String) originalContent);
+            }
             else
             {
                 return originalContent;
@@ -58,6 +62,13 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator
         {
             return originalContent;
         }
+    }
+
+    private Object interoperateMySQLSelect(String originalContent)
+    {
+        String var = originalContent.replaceFirst("\\?", String.valueOf(this.getDataSeriesId()));
+
+        return var;
     }
 
     private String interoperateMySQLInsert(String statement)

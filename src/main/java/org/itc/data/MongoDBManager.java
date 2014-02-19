@@ -116,8 +116,6 @@ public class MongoDBManager extends IStorageManager
                 resultObject.toString();
             }
 
-            this.notifyObservers();
-
         }
         finally
         {

@@ -45,14 +45,14 @@
             	{
             		"operationtype": "INSERT",
             		"repeat": 1000,
-            		"interoperate": null,
-            		"content": " INSERT INTO `testtable_myisam` (`value1`, `value2`) VALUES (FLOOR(RAND() * 1000), FLOOR(RAND() * 1000)); "
+            		"interoperate": "BASIC",
+            		"content": " INSERT INTO `testtable_myisam` (`value1`, `value2`) VALUES (?, ?); "
             	},
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
-            		"interoperate": null,
-            		"content": " SELECT id, value1, value2 FROM testtable_myisam WHERE value1=(FLOOR(RAND() * 1000)); "
+            		"interoperate": "BASIC",
+            		"content": " SELECT id, value1, value2 FROM testtable_myisam WHERE value1=?; "
             	}
             ]
         },
@@ -81,14 +81,14 @@
             	{
             		"operationtype": "INSERT",
             		"repeat": 1000,
-            		"interoperate": null,
-            		"content": " INSERT INTO `testtable_innodb` (`value1`, `value2`) VALUES (FLOOR(RAND() * 1000), FLOOR(RAND() * 1000)); "
+            		"interoperate": "BASIC",
+            		"content": " INSERT INTO `testtable_innodb` (`value1`, `value2`) VALUES (?, ?); "
             	},
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
-            		"interoperate": null,
-            		"content": " SELECT id, value1, value2 FROM testtable_innodb WHERE value1=(FLOOR(RAND() * 1000)); "
+            		"interoperate": "BASIC",
+            		"content": " SELECT id, value1, value2 FROM testtable_innodb WHERE value1=?; "
             	}
             ]
         },
@@ -117,14 +117,14 @@
             	{
             		"operationtype": "INSERT",
             		"repeat": 1000,
-            		"interoperate": null,
-            		"content": " INSERT INTO `testtable_tokudb` (`value1`, `value2`) VALUES (FLOOR(RAND() * 1000), FLOOR(RAND() * 1000)); "
+            		"interoperate": "BASIC",
+            		"content": " INSERT INTO `testtable_tokudb` (`value1`, `value2`) VALUES (?, ?); "
             	},
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
-            		"interoperate": null,
-            		"content": " SELECT id, value1, value2 FROM testtable_tokudb WHERE value1=(FLOOR(RAND() * 1000)); "
+            		"interoperate": "BASIC",
+            		"content": " SELECT id, value1, value2 FROM testtable_tokudb WHERE value1=?; "
             	}
             ]
         },

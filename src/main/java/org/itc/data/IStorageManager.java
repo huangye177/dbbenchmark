@@ -38,7 +38,4 @@ public abstract class IStorageManager
 
     }
 
-    public void notifyObservers()
-    {}
-
 }

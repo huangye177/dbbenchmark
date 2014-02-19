@@ -81,8 +81,6 @@ public class MySQLManager extends IStorageManager
             {
                 rs.toString();
             }
-
-            this.notifyObservers();
         }
         catch (SQLException e)
         {

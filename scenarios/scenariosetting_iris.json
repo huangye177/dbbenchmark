@@ -6,13 +6,13 @@
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
-            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",
+            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/testdb",
             "databaseUsername": "iristestdb",
             "databasePassword": "iristestdb",
             "scenarioStatement" : [
                 {
             		"operationtype": "COMMENT",
-            		"content": " GRANT CREATE,SELECT,INSERT,DELETE,UPDATE,ALTER,DROP ON iristestdb.* TO 'iristestdb'@'localhost' IDENTIFIED BY 'iristestdb';  "
+            		"content": " GRANT CREATE,SELECT,INSERT,DELETE,UPDATE,ALTER,DROP ON testdb.* TO 'testdb'@'localhost' IDENTIFIED BY 'testdb';  "
             	},
             	{
             		"operationtype": "COMMENT",
@@ -26,7 +26,7 @@
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
-            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",  
+            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/testdb",  
             "databaseUsername": "iristestdb",
             "databasePassword": "iristestdb",
             "scenarioStatement" : [
@@ -51,8 +51,8 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
-            		"interoperate": null,
-            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_myisam WHERE fkDataSeriesId=FLOOR(RAND() * 1000); "
+            		"interoperate": "GEOMONI_BASIC",
+            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_myisam WHERE fkDataSeriesId=?; "
             	}
             ]
         },
@@ -62,7 +62,7 @@
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
-            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",  
+            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/testdb",  
             "databaseUsername": "iristestdb",
             "databasePassword": "iristestdb",
             "scenarioStatement" : [
@@ -87,8 +87,8 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
-            		"interoperate": null,
-            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_innodb WHERE fkDataSeriesId=FLOOR(RAND() * 1000); "
+            		"interoperate": "GEOMONI_BASIC",
+            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_innodb WHERE fkDataSeriesId=?; "
             	}
             ]
         },
@@ -98,7 +98,7 @@
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
-            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/iristestdb",
+            "databaseConnection": "jdbc:mysql://127.0.0.1:3306/testdb",
             "databaseUsername": "iristestdb",
             "databasePassword": "iristestdb",
             "scenarioStatement" : [
@@ -123,8 +123,8 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
-            		"interoperate": null,
-            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_tokudb WHERE fkDataSeriesId=FLOOR(RAND() * 1000); "
+            		"interoperate": "GEOMONI_BASIC",
+            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_tokudb WHERE fkDataSeriesId=?; "
             	}
             ]
         },
@@ -134,7 +134,7 @@
             "numOfInsertThread": 1,
             "numOfQueryThread": 1,
             "databaseType": "MONGODB",
-            "databaseConnection": "iristestdb",
+            "databaseConnection": "testdb",
             "databaseUsername": null,
             "databasePassword": null,
             "scenarioStatement" : [

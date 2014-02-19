@@ -18,7 +18,18 @@ public class InteroperatorBasic extends IDataInteroperator
     {
         if (DBType.MYSQL.equals(dbtype))
         {
-            return originalContent;
+            if (OperationType.INSERT.equals(operType))
+            {
+                return this.interoperateMySQLInsert(originalContent);
+            }
+            else if (OperationType.SELECT.equals(operType))
+            {
+                return this.interoperateMySQLSelect(originalContent);
+            }
+            else
+            {
+                return originalContent;
+            }
 
         }
         else if (DBType.MONGODB.equals(dbtype))
@@ -40,6 +51,21 @@ public class InteroperatorBasic extends IDataInteroperator
         {
             return originalContent;
         }
+    }
+
+    private Object interoperateMySQLSelect(Object originalContent)
+    {
+        String var = ((String) originalContent).replaceFirst("\\?", String.valueOf(this.getRandomDouble()));
+
+        return var;
+    }
+
+    private Object interoperateMySQLInsert(Object originalContent)
+    {
+        String var = ((String) originalContent).replaceFirst("\\?", String.valueOf(this.getRandomDouble()))
+                .replaceFirst("\\?", String.valueOf(this.getRandomDouble()));
+
+        return var;
     }
 
     private Object interoperateMongoDBInsert(Object content)
