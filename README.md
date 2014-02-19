@@ -6,7 +6,8 @@ dbbenchmark is a database solution benchmark performance comparison toolkits, wh
 
 *   Run with source code directly (after git clone, under project root directory)
 
-	./gradlew clean build run 
+	`./gradlew clean build run` 
+	
 
 (modify file "scenariosetting.json" to change scenario setting, and run above SHELL command again)
 
@@ -18,7 +19,8 @@ OR
 
 *   Run with compiled all-in-one jar file (after git clone, under project root directory)
 
-	./gradlew clean build fatJar
+	`./gradlew clean build fatJar`
+	
 
 Afterwars, an all-in-one jar file, together with its configuration JSON file, will be generated in build/libs.
 
