@@ -29,7 +29,7 @@ public class MongoDBConnectionManager
             try
             {
                 mongoClient = new MongoClient(IRIS_MONGODB);
-                mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
+                mongoClient.setWriteConcern(WriteConcern.UNACKNOWLEDGED);
                 System.out.println("MongoDB Write Concern: " + mongoClient.getWriteConcern().toString());
             }
             catch (UnknownHostException e)

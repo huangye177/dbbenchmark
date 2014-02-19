@@ -5,12 +5,10 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class MySQLManager extends IStorageManager
 {
     private Connection conn = null;
-    private Statement stmt = null;
 
     private String dbConnString = "";
     private String dbUserName = "";
@@ -38,49 +36,30 @@ public class MySQLManager extends IStorageManager
     public void initConnection()
     {
         this.conn = MySQLConnectionManager.getDBConnection(this.dbConnString, this.dbUserName, this.dbPassword);
-        try
-        {
-            this.stmt = this.conn.createStatement();
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
         this.printDBMetaInfo();
     }
 
     @Override
     public void closeConnection()
     {
-        if (this.stmt != null)
-        {
-            try
-            {
-                this.stmt.close();
-            }
-            catch (SQLException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        this.stmt = null;
         MySQLConnectionManager.closeDBConnection(this.conn);
     }
 
     @Override
     public void execSelectOperation(Object content)
     {
+        PreparedStatement preparedStatement = null;
         ResultSet rs = null;
 
         try
         {
-            rs = this.stmt.executeQuery((String) content);
+            preparedStatement = this.conn.prepareStatement((String) content);
+            rs = preparedStatement.executeQuery();
 
-            while (rs.next())
-            {
-                rs.toString();
-            }
+            // while (rs.next())
+            // {
+            // // rs.getLong(1);
+            // }
         }
         catch (SQLException e)
         {
@@ -92,6 +71,7 @@ public class MySQLManager extends IStorageManager
             try
             {
                 rs.close();
+                preparedStatement.close();
             }
             catch (SQLException e)
             {

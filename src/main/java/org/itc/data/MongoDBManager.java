@@ -10,7 +10,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 /**
@@ -75,7 +74,7 @@ public class MongoDBManager extends IStorageManager
             indexObject.append(indexNames.get(i), 1);
         }
 
-        collection.ensureIndex(indexObject, "default_index");
+        collection.ensureIndex(indexObject, "default_mongodb_test_index");
 
     }
 
@@ -110,12 +109,12 @@ public class MongoDBManager extends IStorageManager
 
         try
         {
-            while (cursor.hasNext())
-            {
-                DBObject resultObject = cursor.next();
-                resultObject.toString();
-            }
-
+            // while (cursor.hasNext())
+            // {
+            // cursor.next();
+            // // DBObject obj = cursor.next();
+            // // obj.get("_id");
+            // }
         }
         finally
         {
