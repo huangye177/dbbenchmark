@@ -51,7 +51,7 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 10000,
-            		"fetchSize": 1000,
+            		"fetchSize": 0,
             		"interoperate": "GEOMONI_BASIC",
             		"content": " SELECT fkDataSeriesId, measDateUtc, measDateSite, project_id, measvalue FROM gm_std_measurements_myisam WHERE fkDataSeriesId=?; "
             	}
@@ -88,7 +88,7 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 10000,
-            		"fetchSize": 1000,
+            		"fetchSize": 0,
             		"interoperate": "GEOMONI_BASIC",
             		"content": " SELECT fkDataSeriesId, measDateUtc, measDateSite, project_id, measvalue FROM gm_std_measurements_innodb WHERE fkDataSeriesId=?; "
             	}
@@ -125,7 +125,7 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 10000,
-            		"fetchSize": 1000,
+            		"fetchSize": 0,
             		"interoperate": "GEOMONI_BASIC",
             		"content": " SELECT fkDataSeriesId, measDateUtc, measDateSite, project_id, measvalue FROM gm_std_measurements_tokudb WHERE fkDataSeriesId=?; "
             	}
@@ -171,7 +171,7 @@
                 {
                 	"operationtype": "SELECT",
             		"repeat": 10000,
-            		"fetchSize": 1000,
+            		"fetchSize": 0,
             		"interoperate": "GEOMONI_BASIC",
             		"content": {
                 	    "collectionname": "gm_std_measurements",

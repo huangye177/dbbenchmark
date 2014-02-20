@@ -51,7 +51,7 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 10000,
-            		"fetchSize": 1000,
+            		"fetchSize": 0,
             		"interoperate": "BASIC",
             		"content": " SELECT id, value1, value2 FROM testtable_myisam WHERE value1=?; "
             	}
@@ -88,7 +88,7 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 10000,
-            		"fetchSize": 1000,
+            		"fetchSize": 0,
             		"interoperate": "BASIC",
             		"content": " SELECT id, value1, value2 FROM testtable_innodb WHERE value1=?; "
             	}
@@ -125,7 +125,7 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 10000,
-            		"fetchSize": 1000,
+            		"fetchSize": 0,
             		"interoperate": "BASIC",
             		"content": " SELECT id, value1, value2 FROM testtable_tokudb WHERE value1=?; "
             	}
@@ -171,7 +171,7 @@
                 {
                 	"operationtype": "SELECT",
             		"repeat": 10000,
-            		"fetchSize": 1000,
+            		"fetchSize": 0,
             		"interoperate": "BASIC",
             		"content": {
                 	    "collectionname": "testcollection",

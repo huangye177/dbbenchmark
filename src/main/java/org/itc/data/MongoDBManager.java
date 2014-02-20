@@ -10,7 +10,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 /**
@@ -118,8 +117,7 @@ public class MongoDBManager extends IStorageManager
             {
                 while (cursor.hasNext() && (counter < this.fetchSize))
                 {
-                    DBObject obj = cursor.next();
-                    obj.toString();
+                    cursor.next();
                     counter++;
                 }
             }
