@@ -68,18 +68,8 @@ public class InteroperatorBasic extends IDataInteroperator
         return var;
     }
 
-    private Object interoperateMongoDBInsert(Object content)
-    {
-        return this.injectRandomIntIntoDocument(content);
-    }
-
-    private Object interoperateMongoDBSelect(Object content)
-    {
-        return this.injectRandomIntIntoDocument(content);
-    }
-
     @SuppressWarnings("unchecked")
-    private Object injectRandomIntIntoDocument(Object originalContent)
+    private Object interoperateMongoDBInsert(Object originalContent)
     {
         Map<String, Object> originalContentMap = (HashMap<String, Object>) originalContent;
         List<String> documents = (ArrayList<String>) originalContentMap.get("document");
@@ -93,6 +83,38 @@ public class InteroperatorBasic extends IDataInteroperator
         // create the to-return result
         Map<String, Object> returnContentMap = new HashMap<String, Object>(originalContentMap);
         returnContentMap.put("document", dbObject);
+
+        return returnContentMap;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private Object interoperateMongoDBSelect(Object originalContent)
+    {
+        Map<String, Object> originalContentMap = (HashMap<String, Object>) originalContent;
+        List<ArrayList> documents = (ArrayList<ArrayList>) originalContentMap.get("document");
+
+        // find query condition attributes & to-return attributes
+        List<String> conditions = documents.get(0);
+        List<String> returns = documents.get(1);
+
+        BasicDBObject conditionObject = new BasicDBObject();
+        for (String doc : conditions)
+        {
+            conditionObject.append(doc, this.getRandomDouble());
+        }
+
+        BasicDBObject returnsObject = new BasicDBObject();
+        returnsObject.append("_id", 0);
+        for (String doc : returns)
+        {
+            returnsObject.append(doc, 1);
+        }
+
+        // create the to-return result
+        Map<String, Object> returnContentMap = new HashMap<String, Object>(originalContentMap);
+
+        returnContentMap.put("conditions", conditionObject);
+        returnContentMap.put("returns", returnsObject);
 
         return returnContentMap;
     }

@@ -7,8 +7,8 @@
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
             "databaseConnection": "jdbc:mysql://127.0.0.1:3306/testdb",
-            "databaseUsername": "iristestdb",
-            "databasePassword": "iristestdb",
+            "databaseUsername": "testdb",
+            "databasePassword": "testdb",
             "scenarioStatement" : [
                 {
             		"operationtype": "COMMENT",
@@ -27,8 +27,8 @@
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
             "databaseConnection": "jdbc:mysql://127.0.0.1:3306/testdb",  
-            "databaseUsername": "iristestdb",
-            "databasePassword": "iristestdb",
+            "databaseUsername": "testdb",
+            "databasePassword": "testdb",
             "scenarioStatement" : [
             	{
             		"operationtype": "DELETE",
@@ -40,19 +40,20 @@
             		"operationtype": "CREATE",
             		"repeat": 1,
             		"interoperate": null,
-            		"content": " CREATE TABLE `gm_std_measurements_myisam` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `Index2` (`fkDataSeriesId`,`measDateUtc`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8 "
+            		"content": " CREATE TABLE `gm_std_measurements_myisam` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `default_gm_index` (`fkDataSeriesId`, `measDateUtc`, `measDateSite`, `project_id`, `measvalue`, `refMeas`, `reliability`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8 "
             	},
             	{
             		"operationtype": "INSERT",
             		"repeat": 1000,
             		"interoperate": "GEOMONI_BASIC",
-            		"content": " INSERT INTO `gm_std_measurements_myisam` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
+            		"content": " INSERT INTO `gm_std_measurements_myisam` (`fkDataSeriesId`, `measDateUtc`, `measDateSite`, `project_id`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
             	},
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
+            		"fetchSize": 1000,
             		"interoperate": "GEOMONI_BASIC",
-            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_myisam WHERE fkDataSeriesId=?; "
+            		"content": " SELECT fkDataSeriesId, measDateUtc, measDateSite, project_id, measvalue FROM gm_std_measurements_myisam WHERE fkDataSeriesId=?; "
             	}
             ]
         },
@@ -63,8 +64,8 @@
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
             "databaseConnection": "jdbc:mysql://127.0.0.1:3306/testdb",  
-            "databaseUsername": "iristestdb",
-            "databasePassword": "iristestdb",
+            "databaseUsername": "testdb",
+            "databasePassword": "testdb",
             "scenarioStatement" : [
             	{
             		"operationtype": "DELETE",
@@ -76,19 +77,20 @@
             		"operationtype": "CREATE",
             		"repeat": 1,
             		"interoperate": null,
-            		"content": " CREATE TABLE `gm_std_measurements_innodb` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `Index2` (`fkDataSeriesId`,`measDateUtc`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 "
+            		"content": " CREATE TABLE `gm_std_measurements_innodb` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `default_gm_index` (`fkDataSeriesId`, `measDateUtc`, `measDateSite`, `project_id`, `measvalue`, `refMeas`, `reliability`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8 "
             	},
             	{
             		"operationtype": "INSERT",
             		"repeat": 1000,
             		"interoperate": "GEOMONI_BASIC",
-            		"content": " INSERT INTO `gm_std_measurements_innodb` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
+            		"content": " INSERT INTO `gm_std_measurements_innodb` (`fkDataSeriesId`, `measDateUtc`, `measDateSite`, `project_id`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
             	},
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
+            		"fetchSize": 1000,
             		"interoperate": "GEOMONI_BASIC",
-            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_innodb WHERE fkDataSeriesId=?; "
+            		"content": " SELECT fkDataSeriesId, measDateUtc, measDateSite, project_id, measvalue FROM gm_std_measurements_innodb WHERE fkDataSeriesId=?; "
             	}
             ]
         },
@@ -99,8 +101,8 @@
             "numOfQueryThread": 1,
             "databaseType": "MYSQL",
             "databaseConnection": "jdbc:mysql://127.0.0.1:3306/testdb",
-            "databaseUsername": "iristestdb",
-            "databasePassword": "iristestdb",
+            "databaseUsername": "testdb",
+            "databasePassword": "testdb",
             "scenarioStatement" : [
             	{
             		"operationtype": "DELETE",
@@ -112,19 +114,20 @@
             		"operationtype": "CREATE",
             		"repeat": 1,
             		"interoperate": null,
-            		"content": " CREATE TABLE `gm_std_measurements_tokudb` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `Index2` (`fkDataSeriesId`,`measDateUtc`) ) ENGINE=TokuDB DEFAULT CHARSET=utf8 "
+            		"content": " CREATE TABLE `gm_std_measurements_tokudb` (`id` bigint(20) NOT NULL AUTO_INCREMENT, `project_id` int(11) DEFAULT NULL, `fkDataSeriesId` bigint(20) DEFAULT NULL, `measDateUtc` datetime DEFAULT NULL, `measDateSite` datetime DEFAULT NULL, `measvalue` double DEFAULT NULL, `refMeas` bit(1) DEFAULT NULL, `reliability` double DEFAULT NULL, PRIMARY KEY (`id`), KEY `default_gm_index` (`fkDataSeriesId`, `measDateUtc`, `measDateSite`, `project_id`, `measvalue`, `refMeas`, `reliability`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8 "
             	},
             	{
             		"operationtype": "INSERT",
             		"repeat": 1000,
             		"interoperate": "GEOMONI_BASIC",
-            		"content": " INSERT INTO `gm_std_measurements_tokudb` (`project_id`, `fkDataSeriesId`, `measDateUtc`, `measDateSite`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
+            		"content": " INSERT INTO `gm_std_measurements_tokudb` (`fkDataSeriesId`, `measDateUtc`, `measDateSite`, `project_id`, `measvalue`, `refMeas`, `reliability`) VALUES (?, ?, ?, ?, ?, 0, 1.0); "
             	},
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
+            		"fetchSize": 1000,
             		"interoperate": "GEOMONI_BASIC",
-            		"content": " SELECT id, project_id, fkDataSeriesId, measDateUtc, measvalue FROM gm_std_measurements_tokudb WHERE fkDataSeriesId=?; "
+            		"content": " SELECT fkDataSeriesId, measDateUtc, measDateSite, project_id, measvalue FROM gm_std_measurements_tokudb WHERE fkDataSeriesId=?; "
             	}
             ]
         },
@@ -153,7 +156,7 @@
             		"interoperate": "GEOMONI_BASIC",
             		"content": {
                 	    "collectionname": "gm_std_measurements",
-                        "collectionindex": ["fkDataSeriesId", "measDateUtc"]
+                        "collectionindex": ["fkDataSeriesId", "measDateUtc", "measDateSite", "project_id", "measvalue", "refMeas", "reliability"]
             		}
             	},
             	{
@@ -162,16 +165,17 @@
             		"interoperate": "GEOMONI_BASIC",
             		"content": {
                 	    "collectionname": "gm_std_measurements",
-                        "document": ["project_id", "fkDataSeriesId", "measDateUtc", "measDateSite", "measvalue", "refMeas", "reliability"]
+                        "document": ["fkDataSeriesId", "measDateUtc", "measDateSite", "project_id", "measvalue", "refMeas", "reliability"]
             		}
             	},
                 {
                 	"operationtype": "SELECT",
             		"repeat": 1000,
+            		"fetchSize": 1000,
             		"interoperate": "GEOMONI_BASIC",
             		"content": {
                 	    "collectionname": "gm_std_measurements",
-                        "document": ["fkDataSeriesId"]
+                        "document": [["fkDataSeriesId"], ["fkDataSeriesId", "measDateUtc", "measDateSite", "project_id", "measvalue", "refMeas", "reliability"]]
             		}
             	}
             ]

@@ -75,10 +75,11 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator
     {
         String var = "";
 
-        var = statement.replaceFirst("\\?", String.valueOf(this.getProjectId()))
+        var = statement
                 .replaceFirst("\\?", String.valueOf(this.getDataSeriesId()))
                 .replaceFirst("\\?", "\'" + this.datetimeFormat.format(this.getMeasDate()) + "\'")
                 .replaceFirst("\\?", "\'" + this.datetimeFormat.format(this.getMeasDate()) + "\'")
+                .replaceFirst("\\?", String.valueOf(this.getProjectId()))
                 .replaceFirst("\\?", String.valueOf(this.getMeasValue()));
 
         return var;
@@ -92,10 +93,10 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator
 
         BasicDBObject insertObject = new BasicDBObject();
 
-        insertObject.append(inputArray.get(0), this.getProjectId());
-        insertObject.append(inputArray.get(1), this.getDataSeriesId());
+        insertObject.append(inputArray.get(0), this.getDataSeriesId());
+        insertObject.append(inputArray.get(1), this.datetimeFormat.format(this.getMeasDate()));
         insertObject.append(inputArray.get(2), this.datetimeFormat.format(this.getMeasDate()));
-        insertObject.append(inputArray.get(3), this.datetimeFormat.format(this.getMeasDate()));
+        insertObject.append(inputArray.get(3), this.getProjectId());
         insertObject.append(inputArray.get(4), this.getMeasValue());
         insertObject.append(inputArray.get(5), false);
         insertObject.append(inputArray.get(6), 1.0);
@@ -107,19 +108,33 @@ public class InteroperatorGeomoniBasic extends IDataInteroperator
         return returnContentMap;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private Object interoperateMongoDBSelect(Object content)
     {
         Map<String, Object> contentMap = (HashMap<String, Object>) content;
-        List<String> inputArray = (ArrayList<String>) contentMap.get("document");
+        // List<String> inputArray = (ArrayList<String>)
+        // contentMap.get("document");
 
-        BasicDBObject selectObject = new BasicDBObject();
+        List<ArrayList> documents = (ArrayList<ArrayList>) contentMap.get("document");
 
-        selectObject.append(inputArray.get(0), this.getDataSeriesId());
+        // find query condition attributes & to-return attributes
+        List<String> conditions = documents.get(0);
+        List<String> returns = documents.get(1);
+
+        BasicDBObject conditionObject = new BasicDBObject();
+        conditionObject.append(conditions.get(0), this.getDataSeriesId());
+
+        BasicDBObject returnsObject = new BasicDBObject();
+        returnsObject.append("_id", 0);
+        for (String doc : returns)
+        {
+            returnsObject.append(doc, 1);
+        }
 
         // create the to-return result
         Map<String, Object> returnContentMap = new HashMap<String, Object>(contentMap);
-        returnContentMap.put("document", selectObject);
+        returnContentMap.put("conditions", conditionObject);
+        returnContentMap.put("returns", returnsObject);
 
         return returnContentMap;
     }

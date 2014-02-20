@@ -30,8 +30,8 @@ public class StaticObserver extends IObserver
 
         String timeStamp = formatter.format(Calendar.getInstance().getTime());
 
-        String infoLine = "" + timeStamp + " \n " + msg + " | " + value;
-        infoLine += "\n#CPU: " + this.checkCPUInfo() +
+        String infoLine = "\n" + timeStamp + " \n " + msg + " | " + value;
+        infoLine += " #CPU: " + this.checkCPUInfo() +
                 "; #RAM: " + this.checkRAMInfo() +
                 "; #MySQL Size: " + this.checkMysqlDBSizeInfo() +
                 "; #MongoDB Size: " + this.checkMongoDBSizeInfo();

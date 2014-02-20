@@ -10,6 +10,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 /**
@@ -100,21 +101,28 @@ public class MongoDBManager extends IStorageManager
         Map<String, Object> contentMap = (HashMap<String, Object>) content;
 
         String collectionName = (String) contentMap.get("collectionname");
-        BasicDBObject document = (BasicDBObject) contentMap.get("document");
+        // BasicDBObject document = (BasicDBObject) contentMap.get("document");
+        BasicDBObject conditions = (BasicDBObject) contentMap.get("conditions");
+        BasicDBObject returns = (BasicDBObject) contentMap.get("returns");
 
         DBCollection collection = mongoDBDataBase.getCollection(collectionName);
 
         DBCursor cursor = null;
-        cursor = collection.find(document);
+        cursor = collection.find(conditions, returns);
 
         try
         {
-            // while (cursor.hasNext())
-            // {
-            // cursor.next();
-            // // DBObject obj = cursor.next();
-            // // obj.get("_id");
-            // }
+            // fetch predefined number of rows from scenario
+            int counter = 0;
+            if (this.fetchSize > 0)
+            {
+                while (cursor.hasNext() && (counter < this.fetchSize))
+                {
+                    DBObject obj = cursor.next();
+                    obj.toString();
+                    counter++;
+                }
+            }
         }
         finally
         {

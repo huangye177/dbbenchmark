@@ -56,10 +56,17 @@ public class MySQLManager extends IStorageManager
             preparedStatement = this.conn.prepareStatement((String) content);
             rs = preparedStatement.executeQuery();
 
-            // while (rs.next())
-            // {
-            // // rs.getLong(1);
-            // }
+            // fetch predefined number of rows from scenario
+            int counter = 0;
+            if (this.fetchSize > 0)
+            {
+                while (rs.next() && (counter < this.fetchSize))
+                {
+                    rs.toString();
+                    counter++;
+                }
+            }
+
         }
         catch (SQLException e)
         {

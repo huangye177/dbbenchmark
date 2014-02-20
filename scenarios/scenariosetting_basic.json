@@ -51,6 +51,7 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
+            		"fetchSize": 1000,
             		"interoperate": "BASIC",
             		"content": " SELECT id, value1, value2 FROM testtable_myisam WHERE value1=?; "
             	}
@@ -87,6 +88,7 @@
             	{
             		"operationtype": "SELECT",
             		"repeat": 1000,
+            		"fetchSize": 1000,
             		"interoperate": "BASIC",
             		"content": " SELECT id, value1, value2 FROM testtable_innodb WHERE value1=?; "
             	}

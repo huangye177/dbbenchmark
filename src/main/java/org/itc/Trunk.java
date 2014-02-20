@@ -87,6 +87,7 @@ public class Trunk
 
             for (ScenarioStatement stat : su.getScenarioStatement())
             {
+                cal.setTime(new Date());
                 String info = "\n[---START Scenario " + scenarioName + "---] " + su.getDatabaseType() + " DB " + stat.getOperationtype()
                         + " scenario started at: " + dateFormat.format(cal.getTime());
                 long startTime = System.currentTimeMillis();
@@ -106,6 +107,8 @@ public class Trunk
                 }
                 else if (OperationType.INSERT.equals(operType))
                 {
+                    dbManager.setBatchSize(stat.getBatchSize());
+
                     this.dbInsertThread.clear();
 
                     int numInsert = stat.getRepeat();
@@ -147,6 +150,8 @@ public class Trunk
                 }
                 else if (OperationType.SELECT.equals(operType))
                 {
+                    dbManager.setFetchSize(stat.getFetchSize());
+
                     this.dbQueryThread.clear();
 
                     int numSelect = stat.getRepeat();
@@ -200,8 +205,10 @@ public class Trunk
                 // double sizeKB = dbManager.getMeasurementDataSize();
                 // double indexKB = dbManager.getMeasurementDataIndexSize();
 
-                info = "\n[---DONE " + scenarioName + "---] SCENARIO-" + stat.getOperationtype() + " *END: (" + dbType + ") Execution duration: "
-                        + durationSecond + " seconds (" + durationMillis + " milliseocnds)";
+                cal.setTime(new Date());
+                info = "\n[---DONE " + scenarioName + "---] SCENARIO-" + stat.getOperationtype() + " END at " + dateFormat.format(cal.getTime()) + "; ("
+                        + dbType + ") Execution duration: " + durationSecond + " seconds (" + durationMillis + " milliseocnds)";
+
                 // info += "\n" + dbType + " DB SIZE: " + (sizeKB / 1024) +
                 // "MB (" + (sizeKB / 1024 / 1024) + " GB /" + sizeKB + " KB)";
                 // info += "\n" + dbType + " DB INDEX SIZE: " + (indexKB / 1024)

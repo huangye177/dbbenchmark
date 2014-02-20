@@ -2,6 +2,9 @@ package org.itc.data;
 
 import java.util.ArrayList;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import org.itc.scenario.IObserver;
 
 public abstract class IStorageManager
@@ -10,6 +13,14 @@ public abstract class IStorageManager
 
     public IStorageManager()
     {}
+
+    @Getter
+    @Setter
+    protected int batchSize = 1;
+
+    @Getter
+    @Setter
+    protected int fetchSize = 1;
 
     public abstract void initConnection();
 
