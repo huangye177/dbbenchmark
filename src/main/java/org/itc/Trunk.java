@@ -88,8 +88,10 @@ public class Trunk
             for (ScenarioStatement stat : su.getScenarioStatement())
             {
                 cal.setTime(new Date());
-                String info = "\n[---START Scenario " + scenarioName + "---] " + su.getDatabaseType() + " DB " + stat.getOperationtype()
-                        + " scenario started at: " + dateFormat.format(cal.getTime());
+                double numOfRepeastInThousand = ((double) stat.getRepeat()) / 1000;
+
+                String info = "\n[---START Scenario " + scenarioName + " (" + numOfRepeastInThousand + "K) ---] " + su.getDatabaseType() + " DB "
+                        + stat.getOperationtype() + " scenario started at: " + dateFormat.format(cal.getTime());
                 long startTime = System.currentTimeMillis();
 
                 this.staticObserver.update(info);
