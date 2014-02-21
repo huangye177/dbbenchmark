@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)http://chris.photobooks.com/json/default.htm -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>DB Benchmark</title>
+	
+	<meta name="robots" content="index,follow">
+
+	<meta name="keywords" content="database, benchmark, scenario, builder, json,visualize,pretty print,developer tool">
+
+	<link rel="canonical" href="javascript/dbbenchmark_scenariobuilder.html">
+
+	<link rel="stylesheet" type="text/css" href="css/reset-fonts.css">
+
+	<link rel="stylesheet" type="text/css" href="css/base.css">
+
+	<link rel="stylesheet" type="text/css" href="css/default.css">
+
+	
+	
+	<script type="text/javascript" src="javascript/jquery-1.10.2.min.js"></script>
+
+	<script src="javascript/d3.v3.js" charset="utf-8"></script>
+
+	<script type="text/javascript" src="javascript/jquery.timer.js"></script>
+
+	<script type="text/javascript" src="javascript/dbbenchmark.js"></script>
+	
+	<script type="text/javascript" async="" src="javascript/ga.js"></script>
+	
+	<script type="text/javascript" src="javascript/yuiloader-dom-event.js"></script>
+
+	<script type="text/javascript" src="javascript/json-min.js"></script>
+
+	<script type="text/javascript" src="javascript/default-min.js"></script>
+
+</head>
+<body>
+
+	<h1>
+		DB Benchmark</a>
+	</h1>
+
+	<menu style="
+		margin: 0px 0px 1em 0px;
+		padding: 0px;
+		float: left;
+		width: 12em;">
+
+		
+		<!-- input type -->
+		<input type="hidden" name="jsonParser" id="jsonStrict" value="1" checked="checked">
+		
+		<!-- output type -->
+		<input type="hidden" name="jsonOutStyle" id="json2HTML" value="1" checked="checked">
+		
+
+		<h3>Options:</h3>
+
+		<p id="jsonOptionSet" class="HTML">
+
+			<label id="jsonTrunc_label">
+				<input type="checkbox" id="jsonTrunc" value="1" > Truncate long strings
+			</label><br>
+
+			<label id="jsonDate_label">
+				<input type="checkbox" id="jsonDate" value="1" checked="checked"> Detect encoded dates
+			</label><br>
+
+			<label id="jsonData_label">
+				<input type="checkbox" id="jsonData" value="1" > Detect data structures
+			</label><br>
+
+			<label id="jsonSpace_label">
+				<input type="checkbox" id="jsonSpace" value="1">
+				Preserve whitespace
+			</label>
+		</p>
+
+		<h3>Actions:</h3>
+		
+		<p>
+			<button id="cmdRender">Validate JSON</button><br>
+		</p>
+		
+		<form id="simulationform" method="post" action="../dbbenchmark/startsimulation">
+ 			<button type="button" id="startsimulation">Start Simulation!</button>
+		</form>
+		
+		<h3>Toolkits:</h3>
+
+		<p>
+			
+			<span id="loadCommands">
+				<a id="cmdLoad">Load</a>
+				<span id="reloadCommand" style="visibility: hidden;">
+					/ <a id="cmdReload">Reload</a>
+				</span>
+			</span>
+			<span id="loadMessage" style="display: none;">
+				Loading...
+			</span><br>
+			<a id="cmdValidate">Validate</a><br>
+			<a id="cmdClear">Clear</a><br>
+			<a id="cmdEncode">Re-encode</a><br>
+			<span id="htmlCommands">
+				<a id="cmdCollapse">Collapse</a> /
+				<a id="cmdExpand">Expand</a> All<br>
+			</span>
+			
+		</p>
+
+		<code id="jsonLocation"></code>
+
+	</menu>
+
+	<div style="padding-left: 13em;">
+		<h2 style="margin-top: 0px; font-size: 108%;">
+			<label for="jsonInput">Input:</label>
+			<small id="jsonSize"></small>
+		</h2>
+		<textarea id="jsonInput" rows="30" cols="50" placeholder="Paste your JSON here" spellcheck="false" autofocus="autofocus"></textarea>
+
+		<h2 style="font-size: 108%;">Output:</h2>
+		<output style="display: block;" for="jsonInput cmdValidate" id="jsonValidateOutput"></output>
+		<output style="display: block;" for="jsonInput jsonStrict jsonEval json2HTML json2JSON jsonTrunc jsonDate jsonData jsonSpace" id="jsonOutput"></output>
+	</div>
+
+	<footer>
+		<address class="vcard" style="clear: both;">
+			<span class="fn">Based on Chris Nielsen's JSON Visualization JS</span><br>
+		</address>
+
+		<p>
+			<small>
+			See also: 
+			<a href="http://www.jsoneditoronline.org/">JSON Editor</a>
+			<br /> and <br />
+			<a href="http://chris.photobooks.com/json/default.htm">JSON Visualization JS</a> 
+			</small>
+		</p>
+	</footer>
+
+
+	<script type="text/javascript">
+		if (
+			window.location.hostname.substring(0, 6).toLowerCase() !== 'local.'
+		) {
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-5037510-1']);
+			_gaq.push(['_trackPageview']);
+			_gaq.push(['_trackPageLoadTime']);
+
+			(function () {
+				var s, ga = document.createElement('script');
+				ga.type = 'text/javascript';
+				ga.async = true;
+				ga.src =
+					((document.location.protocol === 'https:') ?
+						'https://ssl' : 'http://www') +
+						'.google-analytics.com/ga.js';
+				s = document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(ga, s);
+			}());
+		}
+	</script>
+
+
+
+</body></html>
