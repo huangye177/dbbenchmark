@@ -10,17 +10,17 @@ repositories {
 	maven { url "http://repo.spring.io/libs-milestone" }
 }
 
-// apply plugin: 'java'
-// apply plugin: 'eclipse'
-// apply plugin: 'application'
 // apply plugin: 'fatjar'
+// apply plugin: 'eclipse'
 
+apply plugin: 'java'
+apply plugin: 'application'
 apply plugin: 'war'
 apply plugin: 'jetty'
 apply plugin: 'eclipse-wtp'
 
-// group='org.itc'
-// mainClassName = "org.itc.Trunk"
+group='org.itc'
+mainClassName = "org.itc.Trunk"
 
 sourceCompatibility = 1.6
 version = '0.1.0'
