@@ -19,8 +19,11 @@ import org.itc.model.InteroperateType;
 import org.itc.model.OperationType;
 import org.itc.scenario.IObserver;
 import org.itc.scenario.JSONSettingReaderWriter;
+import org.itc.scenario.ScenarioResult;
 import org.itc.scenario.ScenarioStatement;
+import org.itc.scenario.ScenarioStatementResult;
 import org.itc.scenario.ScenarioUnit;
+import org.itc.scenario.ScenarioUnitResult;
 import org.itc.scenario.Scenarios;
 import org.itc.scenario.StaticObserver;
 import org.itc.scenario.TraceObserver;
@@ -42,10 +45,25 @@ public class Trunk
 
     Date today = new Date();
 
+    /**
+     * Start simulation in local-mode 
+     */
     public Trunk()
     {
         LOGGER.info("Hello, Gradle Application!");
-        this.scenarios = JSONSettingReaderWriter.launchScenarioSetting();
+        this.scenarios = JSONSettingReaderWriter.launchScenarioSetting(null);
+
+        this.dbInsertThread = new ArrayList<StorageCRUDThread>();
+        this.dbQueryThread = new ArrayList<StorageCRUDThread>();
+    }
+    
+    /**
+     * Start simulation in web-mode 
+     */
+    public Trunk(String inputScenarioJSONString)
+    {
+        LOGGER.info("Hello, Gradle Application!");
+        this.scenarios = JSONSettingReaderWriter.launchScenarioSetting(inputScenarioJSONString);
 
         this.dbInsertThread = new ArrayList<StorageCRUDThread>();
         this.dbQueryThread = new ArrayList<StorageCRUDThread>();
@@ -57,12 +75,16 @@ public class Trunk
         scenarioTrunk.getTraceObserver().clearsysLog();
         scenarioTrunk.getStaticObserver().clearsysLog();
 
-        scenarioTrunk.runScenarios();
+        ScenarioResult scenarioResult = scenarioTrunk.runScenarios();
+        
+        System.out.println(scenarioResult);
+        
     }
 
-    public void runScenarios()
+    public ScenarioResult runScenarios()
     {
-
+    	ScenarioResult scenarioResult = new ScenarioResult();
+    	
         for (ScenarioUnit su : scenarios.getScenarioUnits())
         {
             String scenarioName = su.getScenarioName();
@@ -71,7 +93,13 @@ public class Trunk
             {
                 continue;
             }
+            
+            // initialize scenarioUnitResult
+            ScenarioUnitResult scenarioUnitResult = new ScenarioUnitResult();
+            scenarioUnitResult.setScenarioUnitResultName(su.getScenarioName());
+            scenarioUnitResult.setStartTime(new Date());
 
+            long scenarioUnitStartTime = System.currentTimeMillis();
             this.dateFormat.setTimeZone(TimeZone.getTimeZone(su.getTimeZone()));
             Calendar cal = Calendar.getInstance();
 
@@ -87,9 +115,14 @@ public class Trunk
 
             for (ScenarioStatement stat : su.getScenarioStatement())
             {
-                cal.setTime(new Date());
+            	cal.setTime(new Date());
                 double numOfRepeastInThousand = ((double) stat.getRepeat()) / 1000;
-
+                
+            	// initialize ScenarioStatementResult
+            	ScenarioStatementResult scenarioStatementResult = new ScenarioStatementResult();
+            	scenarioStatementResult.setScenarioStatementResultName(scenarioName + " (" + numOfRepeastInThousand + "K) " + stat.getOperationtype());
+            	scenarioStatementResult.setStartTime(new Date());
+            	
                 String info = "\n[---START Scenario " + scenarioName + " (" + numOfRepeastInThousand + "K) ---] " + su.getDatabaseType() + " DB "
                         + stat.getOperationtype() + " scenario started at: " + dateFormat.format(cal.getTime());
                 long startTime = System.currentTimeMillis();
@@ -218,6 +251,12 @@ public class Trunk
                 // " KB)";
 
                 this.staticObserver.update(info, 0);
+                
+                // set scenarioStatementResult 
+                scenarioStatementResult.setEndTime(new Date());
+                scenarioStatementResult.setDurationInSeconds(durationSecond);
+                
+                scenarioUnitResult.getScenarioStatementResults().add(scenarioStatementResult);
             }
 
             /*
@@ -226,8 +265,19 @@ public class Trunk
             dbManager.closeConnection();
 
             dbManager = null;
+            
+            long scenarioUnitEndTime = System.currentTimeMillis();
+            double scenarioUnitDurationSecond = (scenarioUnitEndTime - scenarioUnitStartTime) / 1000;
+            
+            // set scenarioUnitResult 
+            scenarioUnitResult.setEndTime(new Date());
+            scenarioUnitResult.setDurationInSeconds(scenarioUnitDurationSecond);
+            scenarioResult.getScenarioUnitResults().add(scenarioUnitResult);
 
         }
+        
+        return scenarioResult;
+        
     }
 
     /**

@@ -44,13 +44,13 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 1000,
+            		"repeat": 1,
             		"interoperate": "BASIC",
             		"content": " INSERT INTO `testtable_myisam` (`value1`, `value2`) VALUES (?, ?); "
             	},
             	{
             		"operationtype": "SELECT",
-            		"repeat": 10000,
+            		"repeat": 1,
             		"fetchSize": 0,
             		"interoperate": "BASIC",
             		"content": " SELECT id, value1, value2 FROM testtable_myisam WHERE value1=?; "
@@ -81,13 +81,13 @@
             	},
             	{
             		"operationtype": "INSERT",
-            		"repeat": 1000,
+            		"repeat": 1,
             		"interoperate": "BASIC",
             		"content": " INSERT INTO `testtable_innodb` (`value1`, `value2`) VALUES (?, ?); "
             	},
             	{
             		"operationtype": "SELECT",
-            		"repeat": 10000,
+            		"repeat": 1,
             		"fetchSize": 0,
             		"interoperate": "BASIC",
             		"content": " SELECT id, value1, value2 FROM testtable_innodb WHERE value1=?; "

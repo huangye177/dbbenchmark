@@ -16,29 +16,28 @@ $(document).ready(function(){
 			jQuery.ajax(
             {
             	dataType: "json",
-                url : "../dbbenchmark/defaultscenario",
+                url : "../dbbenchmark/runsimulation",
                 type : "GET",
             }).done(function(jsonObj)
             {
                 var str = JSON.stringify(jsonObj, null, " ");
+                console.log(str);
                 
                 jQuery("#jsonInput").val(str);
             });
 			
 			// on-click event
-            d3.select("#startsimulation").on("click", function()
+            d3.select("#endsimulation").on("click", function()
             {
-                startSimulation();
+                endSimulation();
             });
 
             // ---------------- end of JQuery ready ----------------
 });
 
-var startSimulation =  function() {
+var endSimulation =  function() {
     
-	var form = jQuery("#simulationform"); 
-	var jsonInput = jQuery("#jsonInput").val();
-    jQuery("#scenariowebinput").val(jsonInput);
+	var form = jQuery("#endSimulation"); 
     
     form.submit();
     
