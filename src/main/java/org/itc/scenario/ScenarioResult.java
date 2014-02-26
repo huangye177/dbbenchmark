@@ -6,9 +6,13 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class ScenarioResult {
+public class ScenarioResult
+{
 
-	private String scenarioResultName = "";
-	
-	private List<ScenarioUnitResult> scenarioUnitResults = new ArrayList<ScenarioUnitResult>();
+    private String scenarioResultName = "";
+
+    private boolean started = false;
+    private boolean finished = false;
+
+    private List<ScenarioUnitResult> scenarioUnitResults = new ArrayList<ScenarioUnitResult>();
 }

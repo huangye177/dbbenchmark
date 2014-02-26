@@ -43,10 +43,12 @@ public class Trunk
 
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    Date today = new Date();
+    private Date today = new Date();
+    private ScenarioResult scenarioResult = new ScenarioResult();
+    private List<String> allScenarios = new ArrayList<String>();
 
     /**
-     * Start simulation in local-mode 
+     * Start simulation in local-mode
      */
     public Trunk()
     {
@@ -55,10 +57,12 @@ public class Trunk
 
         this.dbInsertThread = new ArrayList<StorageCRUDThread>();
         this.dbQueryThread = new ArrayList<StorageCRUDThread>();
+
+        this.analyzeAllScenarios();
     }
-    
+
     /**
-     * Start simulation in web-mode 
+     * Start simulation in web-mode
      */
     public Trunk(String inputScenarioJSONString)
     {
@@ -67,6 +71,8 @@ public class Trunk
 
         this.dbInsertThread = new ArrayList<StorageCRUDThread>();
         this.dbQueryThread = new ArrayList<StorageCRUDThread>();
+
+        this.analyzeAllScenarios();
     }
 
     public static void main(String[] args)
@@ -75,16 +81,60 @@ public class Trunk
         scenarioTrunk.getTraceObserver().clearsysLog();
         scenarioTrunk.getStaticObserver().clearsysLog();
 
-        ScenarioResult scenarioResult = scenarioTrunk.runScenarios();
-        
-        System.out.println(scenarioResult);
-        
+        scenarioTrunk.runScenarios();
+
+        System.out.println(scenarioTrunk.getScenarioResult());
+
     }
 
-    public ScenarioResult runScenarios()
+    /**
+     * Generate all scneario names as the place holder for javascript xAxis
+     */
+    private void analyzeAllScenarios()
     {
-    	ScenarioResult scenarioResult = new ScenarioResult();
-    	
+        int scenarioStatementCounter = 0;
+        for (ScenarioUnit su : scenarios.getScenarioUnits())
+        {
+            if ("COMMENT".equals(su.getScenarioName()))
+            {
+                continue;
+            }
+
+            for (ScenarioStatement stat : su.getScenarioStatement())
+            {
+                scenarioStatementCounter++;
+                String placeHolder = this.generateScenarioResultName(scenarioStatementCounter, su, stat);
+
+                this.allScenarios.add(placeHolder);
+            }
+        }
+    }
+
+    /**
+     * Generate a scenario result name
+     * 
+     * @param seriesNr
+     * @param su
+     * @param stat
+     * @return
+     */
+    private String generateScenarioResultName(int seriesNr, ScenarioUnit su, ScenarioStatement stat)
+    {
+        return "[" + seriesNr + "]" + su.getScenarioName() + "." + stat.getOperationtype()
+                + "\n(" + ((double) stat.getRepeat()) / 1000 + "K) ";
+    }
+
+    public void runScenarios()
+    {
+        if (this.scenarioResult.isStarted() && (!this.scenarioResult.isFinished()))
+        {
+            return;
+        }
+
+        this.scenarioResult = new ScenarioResult();
+        scenarioResult.setStarted(true);
+
+        int scenarioStatementCounter = 0;
         for (ScenarioUnit su : scenarios.getScenarioUnits())
         {
             String scenarioName = su.getScenarioName();
@@ -93,7 +143,7 @@ public class Trunk
             {
                 continue;
             }
-            
+
             // initialize scenarioUnitResult
             ScenarioUnitResult scenarioUnitResult = new ScenarioUnitResult();
             scenarioUnitResult.setScenarioUnitResultName(su.getScenarioName());
@@ -115,14 +165,15 @@ public class Trunk
 
             for (ScenarioStatement stat : su.getScenarioStatement())
             {
-            	cal.setTime(new Date());
+                scenarioStatementCounter++;
+                cal.setTime(new Date());
                 double numOfRepeastInThousand = ((double) stat.getRepeat()) / 1000;
-                
-            	// initialize ScenarioStatementResult
-            	ScenarioStatementResult scenarioStatementResult = new ScenarioStatementResult();
-            	scenarioStatementResult.setScenarioStatementResultName(scenarioName + " (" + numOfRepeastInThousand + "K) " + stat.getOperationtype());
-            	scenarioStatementResult.setStartTime(new Date());
-            	
+
+                // initialize ScenarioStatementResult
+                ScenarioStatementResult scenarioStatementResult = new ScenarioStatementResult();
+                scenarioStatementResult.setScenarioStatementResultName(this.generateScenarioResultName(scenarioStatementCounter, su, stat));
+                scenarioStatementResult.setStartTime(new Date());
+
                 String info = "\n[---START Scenario " + scenarioName + " (" + numOfRepeastInThousand + "K) ---] " + su.getDatabaseType() + " DB "
                         + stat.getOperationtype() + " scenario started at: " + dateFormat.format(cal.getTime());
                 long startTime = System.currentTimeMillis();
@@ -251,11 +302,11 @@ public class Trunk
                 // " KB)";
 
                 this.staticObserver.update(info, 0);
-                
-                // set scenarioStatementResult 
+
+                // set scenarioStatementResult
                 scenarioStatementResult.setEndTime(new Date());
                 scenarioStatementResult.setDurationInSeconds(durationSecond);
-                
+
                 scenarioUnitResult.getScenarioStatementResults().add(scenarioStatementResult);
             }
 
@@ -265,19 +316,19 @@ public class Trunk
             dbManager.closeConnection();
 
             dbManager = null;
-            
+
             long scenarioUnitEndTime = System.currentTimeMillis();
             double scenarioUnitDurationSecond = (scenarioUnitEndTime - scenarioUnitStartTime) / 1000;
-            
-            // set scenarioUnitResult 
+
+            // set scenarioUnitResult
             scenarioUnitResult.setEndTime(new Date());
             scenarioUnitResult.setDurationInSeconds(scenarioUnitDurationSecond);
-            scenarioResult.getScenarioUnitResults().add(scenarioUnitResult);
+            this.scenarioResult.getScenarioUnitResults().add(scenarioUnitResult);
 
         }
-        
-        return scenarioResult;
-        
+
+        this.scenarioResult.setFinished(true);
+
     }
 
     /**
@@ -585,5 +636,25 @@ public class Trunk
     public void setScenarios(Scenarios scenarios)
     {
         this.scenarios = scenarios;
+    }
+
+    public ScenarioResult getScenarioResult()
+    {
+        return scenarioResult;
+    }
+
+    public void setScenarioResult(ScenarioResult scenarioResult)
+    {
+        this.scenarioResult = scenarioResult;
+    }
+
+    public List<String> getAllScenarios()
+    {
+        return allScenarios;
+    }
+
+    public void setAllScenarios(List<String> allScenarios)
+    {
+        this.allScenarios = allScenarios;
     }
 }

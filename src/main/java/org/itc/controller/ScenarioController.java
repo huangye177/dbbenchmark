@@ -1,5 +1,7 @@
 package org.itc.controller;
 
+import java.util.List;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,8 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class ScenarioController
 {
-	private Trunk scenarioTrunk = null;
-	
+    private Trunk scenarioTrunk = null;
+
     private @Autowired
     ServletContext servletContext;
 
@@ -50,21 +52,51 @@ public class ScenarioController
     @RequestMapping(value = "dbbenchmark/startsimulation", method = RequestMethod.POST)
     public String startSimulation(HttpServletRequest request, HttpServletResponse response)
     {
-    	String jsonInput = request.getParameter("scenariowebinput");
-    	this.scenarioTrunk = new Trunk(jsonInput);
-        
+        String jsonInput = request.getParameter("scenariowebinput");
+        this.scenarioTrunk = new Trunk(jsonInput);
+
         return "redirect:/pages/scenarioresults.html";
     }
-    
+
     @RequestMapping(value = "dbbenchmark/runsimulation", method = RequestMethod.GET)
-    public synchronized @ResponseBody ScenarioResult runSimulation(HttpServletRequest request, HttpServletResponse response)
+    public @ResponseBody
+    ScenarioResult runSimulation(HttpServletRequest request, HttpServletResponse response)
     {
         this.scenarioTrunk.getTraceObserver().clearsysLog();
         this.scenarioTrunk.getStaticObserver().clearsysLog();
 
-        ScenarioResult scenarioResult = scenarioTrunk.runScenarios();
-        
-        return scenarioResult;
+        this.scenarioTrunk.runScenarios();
+
+        return this.scenarioTrunk.getScenarioResult();
     }
-    
+
+    @RequestMapping(value = "dbbenchmark/getsimulation", method = RequestMethod.GET)
+    public @ResponseBody
+    ScenarioResult getSimulationResult(HttpServletRequest request, HttpServletResponse response)
+    {
+        if (this.scenarioTrunk == null)
+        {
+            return null;
+        }
+        else
+        {
+            return this.scenarioTrunk.getScenarioResult();
+        }
+    }
+
+    @RequestMapping(value = "dbbenchmark/countsimulation", method = RequestMethod.GET)
+    public @ResponseBody
+    List<String> counterSimulationResult(HttpServletRequest request, HttpServletResponse response)
+    {
+        if (this.scenarioTrunk != null)
+        {
+            return this.scenarioTrunk.getAllScenarios();
+        }
+        else
+        {
+            return null;
+        }
+
+    }
+
 }
