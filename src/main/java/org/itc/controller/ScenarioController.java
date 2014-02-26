@@ -53,6 +53,7 @@ public class ScenarioController
     public String startSimulation(HttpServletRequest request, HttpServletResponse response)
     {
         String jsonInput = request.getParameter("scenariowebinput");
+        this.scenarioTrunk = null;
         this.scenarioTrunk = new Trunk(jsonInput);
 
         return "redirect:/pages/scenarioresults.html";
@@ -71,7 +72,7 @@ public class ScenarioController
     }
 
     @RequestMapping(value = "dbbenchmark/getsimulation", method = RequestMethod.GET)
-    public @ResponseBody
+    public synchronized @ResponseBody
     ScenarioResult getSimulationResult(HttpServletRequest request, HttpServletResponse response)
     {
         if (this.scenarioTrunk == null)
@@ -80,16 +81,46 @@ public class ScenarioController
         }
         else
         {
+            try
+            {
+                while (!this.scenarioTrunk.getScenarioResult().isStarted())
+                {
+                    System.out.println("getsimulation: Simulation not started yet");
+
+                    Thread.sleep(100);
+                }
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+
+            System.out.println(this.scenarioTrunk.getScenarioResult().getScenarioResultName());
             return this.scenarioTrunk.getScenarioResult();
         }
     }
 
     @RequestMapping(value = "dbbenchmark/countsimulation", method = RequestMethod.GET)
-    public @ResponseBody
+    public synchronized @ResponseBody
     List<String> counterSimulationResult(HttpServletRequest request, HttpServletResponse response)
     {
         if (this.scenarioTrunk != null)
         {
+            try
+            {
+                while (!this.scenarioTrunk.getScenarioResult().isStarted())
+                {
+                    System.out.println("getsimulation: Simulation not started yet");
+
+                    Thread.sleep(100);
+                }
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+
+            this.scenarioTrunk.analyzeAllScenarios();
             return this.scenarioTrunk.getAllScenarios();
         }
         else

@@ -28,12 +28,13 @@ var yAxis = d3.svg.axis();
 var initialData = [];
 var initialScenarios = [];
 
+var svg;
+
 /*
  * get updated data from RESTful and change HTML element accordingly 
  */
 var refreshLineData = function()
 {
-    console.log(JSON.stringify(initialData));
     
     // load update data
     data_update_request = $.ajax(
@@ -59,7 +60,6 @@ var refreshLineData = function()
         
         sim_counter_request.done(function(counter)
         {
-            console.log(" counter: " + counter);
             initialScenarios = counter;
         });
         
@@ -78,22 +78,13 @@ var refreshLineData = function()
                     }
                 });
                 
-                console.log("After process: " + JSON.stringify(initialData));
-                
-                
             });
             
         });
         
-
-        // reset svg attribute
-        var svg = d3.select("#bar_svg_id").attr("width", width + margin.left + margin.right);
+        // identify svg
+        svg = d3.select("#bar_svg_id");
         
-        if(svg == null) {
-            svg = d3.select("body").append("svg").attr("id", "bar_svg_id").attr("xmlns", "http://www.w3.org/2000/svg")
-            .attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append(
-            "g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        }
         
         // set axis domain
         xScale.domain(initialScenarios);
@@ -104,37 +95,29 @@ var refreshLineData = function()
         
         xAxis.scale(xScale).orient("bottom");
         yAxis.scale(yScale).orient("left").tickFormat(d3.format(".2s"));
-        
-        
-        
-        svg.selectAll("#x-axis-id").call(xAxis)
-        .selectAll("text")  
-        .style("text-anchor", "end")
-        .attr("dx", "-.8em")
-        .attr("dy", ".15em")
-        .attr("transform", function(d) {
-            return "rotate(-65)" 
-            });
+
+//        svg.selectAll("#x-axis-id").call(xAxis);
         svg.selectAll("#y-axis-id").call(yAxis);
-        
-        console.log("xScale.rangeBand(): " + xScale.rangeBand());
         
         var bars = svg.selectAll(".bar").data(initialData);
         
-        // draw bars
-        bars.enter().append("rect")
+//        console.log(JSON.stringify(initialData));
+        
+        // redraw
+        svg.selectAll("rect").data(initialData)
         .style("fill", function(d) { return color(d.scenario); })
         .attr("x", function(d) { 
             return xScale(d.scenario); 
         })
         .attr("width", xScale.rangeBand())
         .attr("y", function(d) { 
-            console.log("y:" + d.second ); 
+//            console.log("y:" + d.second ); 
             return yScale(d.second); 
          })
         .attr("height", function(d) { 
             return height - yScale(d.second); 
          });
+        
 
     });
 };
@@ -160,7 +143,7 @@ $(document).ready(
             initialScenarios = [];
             
             // start simulation 
-            $.ajax({
+            run_sim_request = $.ajax({
                 url : "../dbbenchmark/runsimulation",
                 async: true,
                 type : "GET"
@@ -223,14 +206,9 @@ $(document).ready(
                     
                 });
                 
-//                // reset SVG width
-//                if(width < (barWidth * initialScenarios.length)) {
-//                    width = barWidth * initialScenarios.length;
-//                    xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1);
-//                }
-                
                 // prepare SVG
-                var svg = d3.select("body").append("svg").attr("id", "bar_svg_id").attr("xmlns", "http://www.w3.org/2000/svg")
+                svg = d3.select("body").append("svg").attr("id", "bar_svg_id")
+                .attr("xmlns", "http://www.w3.org/2000/svg")
                         .attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append(
                         "g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
                 
@@ -262,7 +240,8 @@ $(document).ready(
                         "text-anchor", "end").text("Seconds");
 
                 // draw bars
-                svg.selectAll(".bar").data(initialData).enter().append("rect").attr("class", "bar")
+                svg.selectAll("rect").data(initialData).enter().append("rect")
+                .attr("class", "bar")
                 .style("fill", function(d) { return color(d.scenario); })
                 .attr("x", function(d) { return xScale(d.scenario); })
                 .attr("width", xScale.rangeBand())

@@ -90,8 +90,9 @@ public class Trunk
     /**
      * Generate all scneario names as the place holder for javascript xAxis
      */
-    private void analyzeAllScenarios()
+    public void analyzeAllScenarios()
     {
+        this.allScenarios.clear();
         int scenarioStatementCounter = 0;
         for (ScenarioUnit su : scenarios.getScenarioUnits())
         {
@@ -121,7 +122,7 @@ public class Trunk
     private String generateScenarioResultName(int seriesNr, ScenarioUnit su, ScenarioStatement stat)
     {
         return "[" + seriesNr + "]" + su.getScenarioName() + "." + stat.getOperationtype()
-                + "\n(" + ((double) stat.getRepeat()) / 1000 + "K) ";
+                + "(" + ((double) stat.getRepeat()) / 1000 + "K)";
     }
 
     public void runScenarios()
