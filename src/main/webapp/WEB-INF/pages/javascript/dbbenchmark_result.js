@@ -78,6 +78,8 @@ var refreshLineData = function()
                     }
                 });
                 
+                console.log("After process: " + JSON.stringify(initialData));
+                
                 
             });
             
