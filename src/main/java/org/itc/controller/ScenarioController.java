@@ -53,7 +53,13 @@ public class ScenarioController
     public String startSimulation(HttpServletRequest request, HttpServletResponse response)
     {
         String jsonInput = request.getParameter("scenariowebinput");
+
+        if (this.scenarioTrunk != null)
+        {
+            this.scenarioTrunk.stopAllThreads();
+        }
         this.scenarioTrunk = null;
+
         this.scenarioTrunk = new Trunk(jsonInput);
 
         return "redirect:/pages/scenarioresults.html";

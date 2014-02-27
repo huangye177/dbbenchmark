@@ -12,6 +12,7 @@ import org.itc.model.IDataInteroperator;
 import org.itc.model.InteroperateType;
 import org.itc.model.OperationType;
 import org.itc.scenario.IObserver;
+import org.itc.scenario.ScenarioStatementResult;
 import org.itc.scenario.TraceObserver;
 
 public class StorageCRUDThread extends Thread
@@ -24,6 +25,8 @@ public class StorageCRUDThread extends Thread
     protected InteroperateType interoperatorType = null;
     protected Object statementContent = "";
 
+    protected ScenarioStatementResult scenarioStatementResult = null;
+
     // --
 
     protected Log logger = null;
@@ -31,6 +34,8 @@ public class StorageCRUDThread extends Thread
 
     private long totalQueryTime = 0;
     private long totalQueryFetchTime = 0;
+
+    private int updateCurrentTimeThreashold = 10;
 
     private IObserver traceObserver = new TraceObserver();
 
@@ -69,6 +74,12 @@ public class StorageCRUDThread extends Thread
             }
 
             dbManager.execInsertOperation(interoperatedObject);
+
+            // update current time in scenarioStatementResult
+            if (i % updateCurrentTimeThreashold == 0)
+            {
+                this.scenarioStatementResult.setCurrentTime(System.currentTimeMillis());
+            }
         }
 
         /*
@@ -101,6 +112,12 @@ public class StorageCRUDThread extends Thread
             }
 
             dbManager.execSelectOperation(interoperatedObject);
+
+            // update current time in scenarioStatementResult
+            if (i % updateCurrentTimeThreashold == 0)
+            {
+                this.scenarioStatementResult.setCurrentTime(System.currentTimeMillis());
+            }
         }
 
         /*

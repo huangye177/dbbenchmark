@@ -1,14 +1,14 @@
 package org.itc.scenario;
 
-import java.util.Date;
-
 import lombok.Data;
 
 @Data
-public class ScenarioStatementResult {
+public class ScenarioStatementResult
+{
 
-	private String scenarioStatementResultName = "";
-	private Date startTime = null;
-	private Date endTime = null;
-	private double durationInSeconds = 0.0;
+    private String scenarioStatementResultName = "";
+    private long startTime = 0;
+    private long currentTime = 0;
+    private long endTime = 0;
+    private double durationInSeconds = 0.0;
 }

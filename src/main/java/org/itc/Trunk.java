@@ -43,7 +43,6 @@ public class Trunk
 
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    private Date today = new Date();
     private ScenarioResult scenarioResult = new ScenarioResult();
     private List<String> allScenarios = new ArrayList<String>();
 
@@ -53,11 +52,17 @@ public class Trunk
     public Trunk()
     {
         LOGGER.info("Hello, Gradle Application!");
+
+        // get scenario from JSON profile from ./scenariosetting.json
         this.scenarios = JSONSettingReaderWriter.launchScenarioSetting(null);
 
         this.dbInsertThread = new ArrayList<StorageCRUDThread>();
         this.dbQueryThread = new ArrayList<StorageCRUDThread>();
 
+        /*
+         * get all scenarios for this experiment-trunk after reading scenario
+         * JSON profile
+         */
         this.analyzeAllScenarios();
     }
 
@@ -67,12 +72,43 @@ public class Trunk
     public Trunk(String inputScenarioJSONString)
     {
         LOGGER.info("Hello, Gradle Application!");
+
+        // get scenario from JSON profile from web UI input
         this.scenarios = JSONSettingReaderWriter.launchScenarioSetting(inputScenarioJSONString);
 
         this.dbInsertThread = new ArrayList<StorageCRUDThread>();
         this.dbQueryThread = new ArrayList<StorageCRUDThread>();
 
+        /*
+         * get all scenarios for this experiment-trunk after reading scenario
+         * JSON profile
+         */
         this.analyzeAllScenarios();
+    }
+
+    /**
+     * clean up running threads
+     */
+    @SuppressWarnings("deprecation")
+    public void stopAllThreads()
+    {
+        if (this.dbInsertThread != null)
+        {
+            for (StorageCRUDThread th : this.dbInsertThread)
+            {
+                th.interrupt();
+                th.stop();
+            }
+        }
+
+        if (this.dbQueryThread != null)
+        {
+            for (StorageCRUDThread th : this.dbQueryThread)
+            {
+                th.interrupt();
+                th.stop();
+            }
+        }
     }
 
     public static void main(String[] args)
@@ -88,7 +124,8 @@ public class Trunk
     }
 
     /**
-     * Generate all scneario names as the place holder for javascript xAxis
+     * Generate all scenario names as the place holder for javascript xAxis
+     * display
      */
     public void analyzeAllScenarios()
     {
@@ -112,7 +149,8 @@ public class Trunk
     }
 
     /**
-     * Generate a scenario result name
+     * Generate a scenario result name according to an external counter, and
+     * info from ScenarioUnit and ScenarioStatement
      * 
      * @param seriesNr
      * @param su
@@ -125,6 +163,9 @@ public class Trunk
                 + "(" + ((double) stat.getRepeat()) / 1000 + "K)";
     }
 
+    /**
+     * Execute all prepared scenarios for the experiment-trunk
+     */
     public void runScenarios()
     {
         if (this.scenarioResult.isStarted() && (!this.scenarioResult.isFinished()))
@@ -132,21 +173,27 @@ public class Trunk
             return;
         }
 
+        // initial ScenarioResult
         this.scenarioResult = new ScenarioResult();
         scenarioResult.setStarted(true);
 
         int scenarioStatementCounter = 0;
+
+        // LOOP all ScenarioUnits
         for (ScenarioUnit su : scenarios.getScenarioUnits())
         {
             String scenarioName = su.getScenarioName();
 
+            // Omit scenario with name as "COMMENT"
             if ("COMMENT".equals(scenarioName))
             {
                 continue;
             }
 
-            // initialize scenarioUnitResult
+            // initialize ScenarioUnitResult
             ScenarioUnitResult scenarioUnitResult = new ScenarioUnitResult();
+            // associate ScenarioUnitResult to its parent ScenarioResult
+            this.scenarioResult.getScenarioUnitResults().add(scenarioUnitResult);
             scenarioUnitResult.setScenarioUnitResultName(su.getScenarioName());
             scenarioUnitResult.setStartTime(new Date());
 
@@ -156,14 +203,15 @@ public class Trunk
 
             DBType dbType = DBType.valueOf(su.getDatabaseType());
 
-            IStorageManager dbManager = DBFactory.buildDBManager(dbType, su.getDatabaseConnection(),
-                    su.getDatabaseUsername(), su.getDatabasePassword());
-
             /*
              * initialize database connection
              */
+            IStorageManager dbManager = DBFactory.buildDBManager(dbType, su.getDatabaseConnection(),
+                    su.getDatabaseUsername(), su.getDatabasePassword());
+
             dbManager.initConnection();
 
+            // LOOP all ScenarioStatement of current ScenarioUnit
             for (ScenarioStatement stat : su.getScenarioStatement())
             {
                 scenarioStatementCounter++;
@@ -172,8 +220,12 @@ public class Trunk
 
                 // initialize ScenarioStatementResult
                 ScenarioStatementResult scenarioStatementResult = new ScenarioStatementResult();
+                // associate ScenarioStatementResult to its parent
+                // ScenarioUnitResult
+                scenarioUnitResult.getScenarioStatementResults().add(scenarioStatementResult);
                 scenarioStatementResult.setScenarioStatementResultName(this.generateScenarioResultName(scenarioStatementCounter, su, stat));
-                scenarioStatementResult.setStartTime(new Date());
+                scenarioStatementResult.setStartTime(System.currentTimeMillis());
+                scenarioStatementResult.setCurrentTime(System.currentTimeMillis());
 
                 String info = "\n[---START Scenario " + scenarioName + " (" + numOfRepeastInThousand + "K) ---] " + su.getDatabaseType() + " DB "
                         + stat.getOperationtype() + " scenario started at: " + dateFormat.format(cal.getTime());
@@ -210,7 +262,7 @@ public class Trunk
                                 numInsertPerThread,
                                 DBType.valueOf(su.getDatabaseType()),
                                 interoperaterType,
-                                stat.getContent()));
+                                stat.getContent(), scenarioStatementResult));
                     }
 
                     // start all threads for insert task
@@ -253,7 +305,7 @@ public class Trunk
                                 numSelectPerThread,
                                 DBType.valueOf(su.getDatabaseType()),
                                 interoperaterType,
-                                stat.getContent()));
+                                stat.getContent(), scenarioStatementResult));
                     }
 
                     // start all threads for select task
@@ -305,10 +357,9 @@ public class Trunk
                 this.staticObserver.update(info, 0);
 
                 // set scenarioStatementResult
-                scenarioStatementResult.setEndTime(new Date());
+                scenarioStatementResult.setCurrentTime(System.currentTimeMillis());
+                scenarioStatementResult.setEndTime(System.currentTimeMillis());
                 scenarioStatementResult.setDurationInSeconds(durationSecond);
-
-                scenarioUnitResult.getScenarioStatementResults().add(scenarioStatementResult);
             }
 
             /*
@@ -324,197 +375,10 @@ public class Trunk
             // set scenarioUnitResult
             scenarioUnitResult.setEndTime(new Date());
             scenarioUnitResult.setDurationInSeconds(scenarioUnitDurationSecond);
-            this.scenarioResult.getScenarioUnitResults().add(scenarioUnitResult);
 
         }
 
         this.scenarioResult.setFinished(true);
-
-    }
-
-    /**
-     * Insert into DB in multi- threads
-     */
-    private void dbInsertThreadLaunch(ScenarioUnit su)
-    {
-        DBType dbType = DBType.valueOf(su.getDatabaseType());
-
-        IStorageManager dbManager = DBFactory.buildDBManager(dbType, su.getDatabaseConnection(),
-                su.getDatabaseUsername(), su.getDatabasePassword());
-
-        Calendar cal = Calendar.getInstance();
-        long startTime = System.currentTimeMillis();
-
-        String info = "\n------------ SCENARIO-INSERT **START: "
-                + " @Datetime: " + dateFormat.format(cal.getTime());
-        info += "\nParam: [dbType]: " + dbType;
-        this.staticObserver.update(info);
-
-        // launch each insert operation with single-/multi- thread
-        this.dbInsertThread.clear();
-        for (ScenarioStatement stat : su.getScenarioStatement())
-        {
-
-            OperationType operType = OperationType.valueOf(stat
-                    .getOperationtype());
-
-            if (OperationType.INSERT.equals(operType))
-            {
-
-                int numInsert = stat.getRepeat();
-                int numInsertPerThread = numInsert / su.getNumOfInsertThread();
-
-                this.dbInsertThread.add(new DBInsertThread(dbManager,
-                        numInsertPerThread,
-                        DBType.valueOf(su.getDatabaseType()),
-                        InteroperateType.valueOf(stat.getInteroperate()),
-                        stat.getContent()));
-            }
-        }
-
-        // initial a DB connection
-        dbManager.initConnection();
-
-        /*
-         * start all threads for insert task
-         */
-        for (StorageCRUDThread thread : this.dbInsertThread)
-        {
-            thread.start();
-        }
-
-        /*
-         * check results of all threads for insert task
-         */
-        while (!this.isThreadsExecuted(this.dbInsertThread))
-        {
-            try
-            {
-                Thread.sleep(1000);
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        double sizeKB = dbManager.getMeasurementDataSize();
-        double indexKB = dbManager.getMeasurementDataIndexSize();
-
-        // close DB connection
-        dbManager.closeConnection();
-
-        long endTime = System.currentTimeMillis();
-        long durationMillis = endTime - startTime;
-        double durationSecond = durationMillis / 1000;
-
-        info = "\n[---DONE---] SCENARIO-INSERT *END: (" + dbType
-                + ") Execution duration: " + durationSecond + " seconds ("
-                + durationMillis + " milliseocnds)";
-        info += "\n" + dbType + " DB SIZE: " + (sizeKB / 1024) + "MB ("
-                + (sizeKB / 1024 / 1024) + " GB /" + sizeKB + " KB)";
-        info += "\n" + dbType + " DB INDEX SIZE: " + (indexKB / 1024) + "MB ("
-                + (indexKB / 1024 / 1024) + " GB /" + indexKB + " KB)";
-
-        this.dbInsertThread.clear();
-        this.staticObserver.update(info, 0);
-    }
-
-    /**
-     * Query from DB in multi- threads
-     */
-    private void dbReadThreadLaunch(ScenarioUnit su)
-    {
-
-        DBType dbType = DBType.valueOf(su.getDatabaseType());
-
-        IStorageManager dbManager = DBFactory.buildDBManager(dbType, su.getDatabaseConnection(),
-                su.getDatabaseUsername(), su.getDatabasePassword());
-
-        Calendar cal = Calendar.getInstance();
-        long startTime = System.currentTimeMillis();
-
-        String info = "\n------------ SCENARIO-READ ++START: " + " @Datetime: "
-                + dateFormat.format(cal.getTime());
-        info += "\nParam: [dbType]: " + dbType + "; " + ";";
-
-        this.staticObserver.update(info);
-
-        /*
-         * prepare all threads for query task
-         */
-        this.dbQueryThread.clear();
-        for (ScenarioStatement stat : su.getScenarioStatement())
-        {
-            OperationType operType = OperationType.valueOf(stat
-                    .getOperationtype());
-
-            if (OperationType.SELECT.equals(operType))
-            {
-
-                int numSelect = stat.getRepeat();
-                int numSelectPerThread = numSelect / su.getNumOfQueryThread();
-
-                this.dbQueryThread.add(new DBQueryThread(dbManager,
-                        numSelectPerThread,
-                        DBType.valueOf(su.getDatabaseType()),
-                        InteroperateType.valueOf(stat.getInteroperate()),
-                        stat.getContent()));
-            }
-        }
-
-        // initial a DB connection
-        dbManager.initConnection();
-
-        /*
-         * start all threads for query task
-         */
-        for (StorageCRUDThread thread : this.dbQueryThread)
-        {
-            thread.start();
-        }
-
-        /*
-         * check results of all threads for query task
-         */
-        while (!this.isThreadsExecuted(this.dbQueryThread))
-        {
-            try
-            {
-                Thread.sleep(1000);
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        long totalQueryTime = 0;
-        long totalQueryFetchTime = 0;
-        for (StorageCRUDThread thread : this.dbQueryThread)
-        {
-            totalQueryTime += thread.getTotalQueryTime();
-            totalQueryFetchTime += thread.getTotalQueryFetchTime();
-        }
-
-        // close DB connection
-        dbManager.closeConnection();
-
-        long endTime = System.currentTimeMillis();
-        long durationMillis = endTime - startTime;
-        double durationSecond = durationMillis / 1000;
-
-        info = "\n[---DONE---] SCENARIO-READ +END: ("
-                + ") Execution duration: " + durationSecond + " seconds ("
-                + durationMillis + " milliseocnds)"
-                + "; Total Query duration: " + (totalQueryTime / 1000)
-                + " seconds (" + totalQueryTime + " milliseocnds) "
-                + "; Total Query+Fetch duration: "
-                + (totalQueryFetchTime / 1000) + " seconds ("
-                + totalQueryFetchTime + " milliseocnds) " + ".";
-
-        this.dbQueryThread.clear();
-        this.staticObserver.update(info, 0);
 
     }
 

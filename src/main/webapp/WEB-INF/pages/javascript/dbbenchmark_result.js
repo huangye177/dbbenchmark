@@ -18,8 +18,6 @@ var xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1);
 var yScale = d3.scale.linear().range([ height, 0 ]);
 
 var color = d3.scale.category20();
-//var color = d3.scale.ordinal()
-//.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
 var xAxis = d3.svg.axis();
 
@@ -44,11 +42,16 @@ var refreshLineData = function()
         type : "GET"
     });
 
+    initialData = [];
+    
     data_update_request.done(function(jsonObj)
     {
-//        if(!jsonObj.started || jsonObj.finished) {
-//            return;
-//        }
+        if(jsonObj.finished) {
+            jQuery("#expfinished").html("Done!"); 
+        } else {
+            jQuery("#expfinished").html("Ongoing..."); 
+        }
+        
         
         // request simulation result
         sim_counter_request = $.ajax(
@@ -56,7 +59,6 @@ var refreshLineData = function()
             url : "../dbbenchmark/countsimulation",
             type : "GET"
         });
-        
         
         sim_counter_request.done(function(counter)
         {
@@ -72,11 +74,13 @@ var refreshLineData = function()
                 
                 var scenarioStatementResult = value1;
                 
-                initialData.forEach(function(d) {
-                    if(d.scenario == scenarioStatementResult.scenarioStatementResultName) {
-                        d.second = scenarioStatementResult.durationInSeconds;
-                    }
-                });
+                initialData.push(
+                        {
+                            scenario : scenarioStatementResult.scenarioStatementResultName,
+                            start : scenarioStatementResult.startTime,
+                            current : scenarioStatementResult.currentTime, 
+                            second : scenarioStatementResult.durationInSeconds
+                        });
                 
             });
             
@@ -89,36 +93,46 @@ var refreshLineData = function()
         // set axis domain
         xScale.domain(initialScenarios);
         
-        yScale.domain([0, d3.max(initialData, function(d){
-            return d.second;
-        })]);
+        if(jsonObj.finished) {
+            yScale.domain([0, d3.max(initialData, function(d){
+                return d.second;
+            })]); 
+        } else {
+            yScale.domain([0, d3.max(initialData, function(d){
+                return (d.current - d.start) / 1000;
+            })]);
+        }
         
-        xAxis.scale(xScale).orient("bottom");
+        
+//        xAxis.scale(xScale).orient("bottom");
         yAxis.scale(yScale).orient("left").tickFormat(d3.format(".2s"));
 
-//        svg.selectAll("#x-axis-id").call(xAxis);
+        svg.selectAll("#x-axis-id").call(xAxis);
         svg.selectAll("#y-axis-id").call(yAxis);
         
         var bars = svg.selectAll(".bar").data(initialData);
         
-//        console.log(JSON.stringify(initialData));
+        console.log(JSON.stringify(initialData));
         
         // redraw
         svg.selectAll("rect").data(initialData)
-        .style("fill", function(d) { return color(d.scenario); })
+        .style("fill", function(d) { 
+            console.log("test" + initialData);
+            return color(d.scenario); 
+         })
         .attr("x", function(d) { 
             return xScale(d.scenario); 
         })
         .attr("width", xScale.rangeBand())
         .attr("y", function(d) { 
-//            console.log("y:" + d.second ); 
-            return yScale(d.second); 
+            console.log("B y:" + (d.current - d.start) ); 
+            timeDiff = (d.current - d.start) / 1000;
+            return yScale(timeDiff); 
          })
         .attr("height", function(d) { 
-            return height - yScale(d.second); 
+            return height - yScale((d.current - d.start) / 1000); 
          });
         
-
     });
 };
 
@@ -170,6 +184,8 @@ $(document).ready(
                     initialData.push(
                             {
                                 scenario : value,
+                                start : 0, 
+                                current : 0,
                                 second : 0
                             });
                 });
@@ -199,6 +215,8 @@ $(document).ready(
                         initialData.push(
                         {
                             scenario : scenarioStatementResult.scenarioStatementResultName,
+                            start : scenarioStatementResult.startTime,
+                            current : scenarioStatementResult.currentTime, 
                             second : scenarioStatementResult.durationInSeconds
                         });
                         
@@ -216,7 +234,8 @@ $(document).ready(
                 xScale.domain(initialScenarios);
                 
                 yScale.domain([0, d3.max(initialData, function(d){
-                    return d.second;
+//                    return d.second;
+                    return d.current - d.start;
                 })]);
                 
                 /*
@@ -245,8 +264,10 @@ $(document).ready(
                 .style("fill", function(d) { return color(d.scenario); })
                 .attr("x", function(d) { return xScale(d.scenario); })
                 .attr("width", xScale.rangeBand())
-                .attr("y", function(d) { return yScale(d.second); })
-                .attr("height", function(d) { return height - yScale(d.second); });
+                .attr("y", function(d) { return yScale(d.current - d.start); })
+                .attr("height", function(d) { return height - yScale(d.current - d.start); });
+//                .attr("y", function(d) { return yScale(d.second); })
+//                .attr("height", function(d) { return height - yScale(d.second); });
                 
                 // on-click event
                 d3.select("#endsimulation").on("click", function()

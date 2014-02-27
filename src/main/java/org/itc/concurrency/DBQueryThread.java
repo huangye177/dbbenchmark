@@ -4,10 +4,12 @@ import org.apache.commons.logging.LogFactory;
 import org.itc.data.IStorageManager;
 import org.itc.model.DBType;
 import org.itc.model.InteroperateType;
+import org.itc.scenario.ScenarioStatementResult;
 
 public class DBQueryThread extends StorageCRUDThread
 {
-    public DBQueryThread(IStorageManager dbManager, int numSelectPerThread, DBType dbType, InteroperateType interoperatorType, Object statementContent)
+    public DBQueryThread(IStorageManager dbManager, int numSelectPerThread, DBType dbType, InteroperateType interoperatorType, Object statementContent,
+            ScenarioStatementResult scenarioStatementResult)
     {
         logger = LogFactory.getLog(DBQueryThread.class);
 
@@ -16,6 +18,7 @@ public class DBQueryThread extends StorageCRUDThread
         this.interoperatorType = interoperatorType;
         this.statementContent = statementContent;
         this.dbType = dbType;
+        this.scenarioStatementResult = scenarioStatementResult;
 
     }
 
