@@ -49,6 +49,14 @@ public class ScenarioController
         return "redirect:/pages/scenarios/scenariosetting_basic.json";
     }
 
+    /**
+     * Initial simulation trunk class and clean resources, then go to result
+     * page and rely ajax javascript to execute simulation and get results
+     * 
+     * @param request
+     * @param response
+     * @return
+     */
     @RequestMapping(value = "dbbenchmark/startsimulation", method = RequestMethod.POST)
     public String startSimulation(HttpServletRequest request, HttpServletResponse response)
     {
@@ -65,6 +73,13 @@ public class ScenarioController
         return "redirect:/pages/scenarioresults.html";
     }
 
+    /**
+     * Execute simulation
+     * 
+     * @param request
+     * @param response
+     * @return
+     */
     @RequestMapping(value = "dbbenchmark/runsimulation", method = RequestMethod.GET)
     public @ResponseBody
     ScenarioResult runSimulation(HttpServletRequest request, HttpServletResponse response)
@@ -77,6 +92,13 @@ public class ScenarioController
         return this.scenarioTrunk.getScenarioResult();
     }
 
+    /**
+     * Get simulation results
+     * 
+     * @param request
+     * @param response
+     * @return
+     */
     @RequestMapping(value = "dbbenchmark/getsimulation", method = RequestMethod.GET)
     public synchronized @ResponseBody
     ScenarioResult getSimulationResult(HttpServletRequest request, HttpServletResponse response)
@@ -104,6 +126,13 @@ public class ScenarioController
         }
     }
 
+    /**
+     * Get all prepared simulation scenarios for chart result initialization
+     * 
+     * @param request
+     * @param response
+     * @return
+     */
     @RequestMapping(value = "dbbenchmark/countsimulation", method = RequestMethod.GET)
     public synchronized @ResponseBody
     List<String> counterSimulationResult(HttpServletRequest request, HttpServletResponse response)

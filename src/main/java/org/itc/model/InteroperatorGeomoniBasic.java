@@ -11,6 +11,9 @@ import java.util.Random;
 
 import com.mongodb.BasicDBObject;
 
+/**
+ * Interoperator for type "GeomoniBasic"
+ */
 public class InteroperatorGeomoniBasic extends IDataInteroperator
 {
 

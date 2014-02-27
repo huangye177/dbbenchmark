@@ -264,9 +264,4 @@ public class MySQLManager extends IStorageManager
 
         return dbIndexSize;
     }
-
-    private java.sql.Date getSQLDate(java.util.Date date)
-    {
-        return new java.sql.Date(date.getTime());
-    }
 }

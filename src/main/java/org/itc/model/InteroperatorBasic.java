@@ -8,6 +8,9 @@ import java.util.Random;
 
 import com.mongodb.BasicDBObject;
 
+/**
+ * Interoperator for type "Basic"
+ */
 public class InteroperatorBasic extends IDataInteroperator
 {
     private Random generator = new Random();

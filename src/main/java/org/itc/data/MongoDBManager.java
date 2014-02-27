@@ -16,7 +16,6 @@ import com.mongodb.MongoClient;
  * CRUD Manager of MongoDB
  * 
  * @author ye huang
- * @datetime 2013 12:51:35 PM
  */
 public class MongoDBManager extends IStorageManager
 {

@@ -147,7 +147,6 @@ var refreshLineData = function()
         
         // fill JSON format result output
         jQuery("#resultjsonformat").html(JSON.stringify(initialData)).attr("text-align", "top").attr("x", -1);
-//        jQuery("#resultjsonformat").html(jsonObj);
         
     });
 };

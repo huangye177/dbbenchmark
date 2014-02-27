@@ -17,29 +17,37 @@ public class JSONSettingReaderWriter
 
     }
 
+    /**
+     * Load JSON based scenario build input
+     * 
+     * @param inputContent
+     * @return
+     */
     public static Scenarios launchScenarioSetting(String inputContent)
     {
         Scenarios scenarios = null;
         File settingFile = null;
 
         ObjectMapper mapper = new ObjectMapper();
-        
+
         try
         {
-        	if(inputContent == null || inputContent.trim().isEmpty()) {
-            	
-        		// read scenario json from ./scenariosetting.json
-        		settingFile = new File("./scenariosetting.json");
+            if (inputContent == null || inputContent.trim().isEmpty())
+            {
+                // read scenario json from ./scenariosetting.json
+                settingFile = new File("./scenariosetting.json");
                 scenarios = mapper.readValue(settingFile, Scenarios.class);
-                
-            } else {
-            	
-            	// read scenario json from web input
-            	scenarios = mapper.readValue(inputContent, Scenarios.class);
-            	
+
             }
-        	
-        	LOGGER.info("Loading scenario settings...");
+            else
+            {
+
+                // read scenario json from web input
+                scenarios = mapper.readValue(inputContent, Scenarios.class);
+
+            }
+
+            LOGGER.info("Loading scenario settings...");
             for (ScenarioUnit su : scenarios.getScenarioUnits())
             {
                 LOGGER.info(su.toString());
