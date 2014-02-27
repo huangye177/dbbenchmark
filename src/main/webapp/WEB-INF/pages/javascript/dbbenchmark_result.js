@@ -103,6 +103,7 @@ var refreshLineData = function()
         xAxis.scale(xScale).orient("bottom");
         yAxis.scale(yScale).orient("left").tickFormat(d3.format(".2s"));
 
+        // re-call xaxis and yaxis
         svg.selectAll("#x-axis-id")
         .call(xAxis)
         .selectAll("text")  
@@ -115,12 +116,11 @@ var refreshLineData = function()
         
         var bars = svg.selectAll(".bar").data(initialData);
         
-        console.log(JSON.stringify(initialData));
+//        console.log(JSON.stringify(initialData));
         
         // redraw
         svg.selectAll("rect").data(initialData)
         .style("fill", function(d) { 
-            console.log("test" + initialData);
             return color(d.scenario); 
          })
         .attr("x", function(d) { 
@@ -128,13 +128,22 @@ var refreshLineData = function()
         })
         .attr("width", xScale.rangeBand())
         .attr("y", function(d) { 
-            console.log("B y:" + (d.current - d.start) ); 
             timeDiff = (d.current - d.start) / 1000;
             return yScale(timeDiff); 
          })
         .attr("height", function(d) { 
             return height - yScale((d.current - d.start) / 1000); 
          });
+        
+        // draw texts
+        svg.selectAll(".textlab").data(initialData)
+        .attr("text-anchor", "middle")
+        .attr("y", function(d) {
+            return yScale((d.current - d.start) / 1000); 
+        })
+        .text( function(d) {
+            return (d.current - d.start) / 1000; 
+         }); 
         
     });
 };
@@ -165,8 +174,6 @@ $(document).ready(
                 async: true,
                 type : "GET"
              });
-            
-            console.log("call switch");
             
             // request prepared simulation scenario info
             sim_counter_request = $.ajax(
@@ -207,7 +214,6 @@ $(document).ready(
                 .call(xAxis)
                 .selectAll("text")  
                 .style("text-anchor", "end")
-//                .attr("transform", rotate(180 200,100));
                 .attr("transform", function(d) {
                     return "rotate(-65)" 
                     });
@@ -215,7 +221,7 @@ $(document).ready(
                 svg.append("g").attr("id", "y-axis-id").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", ".71em").style(
                         "text-anchor", "end").text("Seconds");
 
-                // draw bars
+                // draw empty bars
                 svg.selectAll("rect").data(initialScenarios).enter().append("rect")
                 .attr("class", "bar")
                 .style("fill", function(d) { return d; })
@@ -223,6 +229,16 @@ $(document).ready(
                 .attr("width", xScale.rangeBand())
                 .attr("y", 0)
                 .attr("height", 0);
+                
+                // draw empty texts
+                svg.selectAll(".textlab").data(initialScenarios).enter().append("text")
+                .attr('fill','black')
+                .attr('class','textlab')
+                .attr("text-anchor", "middle")
+                .attr("x", function(d, i) { return xScale(xScale.domain()[i]) + (xScale.rangeBand()/2)})
+                .attr("y", height - 20)
+                .attr("height", 0)
+                .text(0); 
                 
             });
 

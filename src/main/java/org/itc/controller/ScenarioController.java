@@ -100,8 +100,6 @@ public class ScenarioController
             {
                 e.printStackTrace();
             }
-
-            System.out.println(this.scenarioTrunk.getScenarioResult().getScenarioResultName());
             return this.scenarioTrunk.getScenarioResult();
         }
     }
