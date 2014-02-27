@@ -145,6 +145,10 @@ var refreshLineData = function()
             return (d.current - d.start) / 1000; 
          }); 
         
+        // fill JSON format result output
+        jQuery("#resultjsonformat").html(JSON.stringify(initialData)).attr("text-align", "top").attr("x", -1);
+//        jQuery("#resultjsonformat").html(jsonObj);
+        
     });
 };
 
@@ -240,6 +244,10 @@ $(document).ready(
                 .attr("height", 0)
                 .text(0); 
                 
+                // append empty result JSON
+                jQuery("body").append("<div>Experimental result in JSON: </div>");
+                jQuery("body").append("<div id=\"resultjsonformat\">Experimental result in JSON</div>");
+                jQuery("body").append("<br/><br/>");
             });
 
             // ---------------- end of JQuery ready ----------------
