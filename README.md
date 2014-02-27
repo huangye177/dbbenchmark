@@ -4,11 +4,17 @@ dbbenchmark is a database solution benchmark performance comparison toolkits, wh
 
 ## How-to
 
+*   Create a MySQL database named "testdb", and a user with both name and password as "testdb".
+
 *   Run with source code directly (after git clone, under project root directory)
 
 	`./gradlew clean build jettyRunWar` 
 	
 And visit your browser at your localhost: http://localhost:8080/dbbenchmark/
+
+## Again, do NOT forget 
+
+You will need to create proper database and authorized user in advanced; the default scenario of dbbenchmark is running on MySQL MyISAM and InnoDB, with a database named "testdb", and a user with both username and password as "testdb". -- Please create them before you run the default scenario.
 
 ## Supported Database and/or Database engines in example scenario files (dbbenchmark/scenarios):
 
