@@ -33,7 +33,6 @@ var svg;
  */
 var refreshLineData = function()
 {
-    
     // load update data
     data_update_request = $.ajax(
     {
@@ -51,7 +50,6 @@ var refreshLineData = function()
         } else {
             jQuery("#expfinished").html("Ongoing..."); 
         }
-        
         
         // request simulation result
         sim_counter_request = $.ajax(
@@ -81,9 +79,7 @@ var refreshLineData = function()
                             current : scenarioStatementResult.currentTime, 
                             second : scenarioStatementResult.durationInSeconds
                         });
-                
             });
-            
         });
         
         // identify svg
@@ -104,10 +100,17 @@ var refreshLineData = function()
         }
         
         
-//        xAxis.scale(xScale).orient("bottom");
+        xAxis.scale(xScale).orient("bottom");
         yAxis.scale(yScale).orient("left").tickFormat(d3.format(".2s"));
 
-        svg.selectAll("#x-axis-id").call(xAxis);
+        svg.selectAll("#x-axis-id")
+        .call(xAxis)
+        .selectAll("text")  
+        .style("text-anchor", "end")
+        .attr("transform", function(d) {
+          return "rotate(-65)" 
+          });
+        
         svg.selectAll("#y-axis-id").call(yAxis);
         
         var bars = svg.selectAll(".bar").data(initialData);
@@ -165,7 +168,7 @@ $(document).ready(
             
             console.log("call switch");
             
-            // request simulation setup
+            // request prepared simulation scenario info
             sim_counter_request = $.ajax(
             {
                 url : "../dbbenchmark/countsimulation",
@@ -178,51 +181,8 @@ $(document).ready(
                     xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1);
                 }
                 
+                // get all scenarioresult names
                 initialScenarios = counter;
-                
-                $.each(counter, function(key, value) {
-                    initialData.push(
-                            {
-                                scenario : value,
-                                start : 0, 
-                                current : 0,
-                                second : 0
-                            });
-                });
-            });
-            
-            
-            
-            // request simulation result
-            data_update_request = $.ajax(
-            {
-                url : "../dbbenchmark/getsimulation",
-                type : "GET"
-            });
-            data_update_request.done(function(jsonObj)
-            {
-                // load data from returned JSON
-                $.each(jsonObj.scenarioUnitResults, function(key, value) {
-                    
-                    var scenarioUnitResults = value;
-                    
-                    $.each(scenarioUnitResults.scenarioStatementResults, function(key1, value1) {
-                        
-                        var scenarioStatementResult = value1;
-                        
-                        initialScenarios.push(scenarioStatementResult.scenarioStatementResultName);
-                        
-                        initialData.push(
-                        {
-                            scenario : scenarioStatementResult.scenarioStatementResultName,
-                            start : scenarioStatementResult.startTime,
-                            current : scenarioStatementResult.currentTime, 
-                            second : scenarioStatementResult.durationInSeconds
-                        });
-                        
-                    });
-                    
-                });
                 
                 // prepare SVG
                 svg = d3.select("body").append("svg").attr("id", "bar_svg_id")
@@ -233,10 +193,7 @@ $(document).ready(
                 // set axis domain
                 xScale.domain(initialScenarios);
                 
-                yScale.domain([0, d3.max(initialData, function(d){
-//                    return d.second;
-                    return d.current - d.start;
-                })]);
+                yScale.domain([0, 1]);
                 
                 /*
                  * plot axis
@@ -245,12 +202,12 @@ $(document).ready(
                 yAxis.scale(yScale).orient("left").tickFormat(d3.format(".2s"));
 
                 // draw axis
-                svg.append("g").attr("id", "x-axis-id").attr("class", "x axis").attr("transform", "translate(0," + height + ")")
+                svg.append("g").attr("id", "x-axis-id").attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
                 .call(xAxis)
                 .selectAll("text")  
                 .style("text-anchor", "end")
-                .attr("dx", "-.8em")
-                .attr("dy", ".15em")
+//                .attr("transform", rotate(180 200,100));
                 .attr("transform", function(d) {
                     return "rotate(-65)" 
                     });
@@ -259,23 +216,14 @@ $(document).ready(
                         "text-anchor", "end").text("Seconds");
 
                 // draw bars
-                svg.selectAll("rect").data(initialData).enter().append("rect")
+                svg.selectAll("rect").data(initialScenarios).enter().append("rect")
                 .attr("class", "bar")
-                .style("fill", function(d) { return color(d.scenario); })
-                .attr("x", function(d) { return xScale(d.scenario); })
+                .style("fill", function(d) { return d; })
+                .attr("x", function(d) { return xScale(d); })
                 .attr("width", xScale.rangeBand())
-                .attr("y", function(d) { return yScale(d.current - d.start); })
-                .attr("height", function(d) { return height - yScale(d.current - d.start); });
-//                .attr("y", function(d) { return yScale(d.second); })
-//                .attr("height", function(d) { return height - yScale(d.second); });
+                .attr("y", 0)
+                .attr("height", 0);
                 
-                // on-click event
-                d3.select("#endsimulation").on("click", function()
-                {
-                    endSimulation();
-                });
-                
-
             });
 
             // ---------------- end of JQuery ready ----------------
