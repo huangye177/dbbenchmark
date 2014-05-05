@@ -1,6 +1,6 @@
 # What is dbbenchmark
 
-dbbenchmark is a database solution benchmark performance comparison toolkits, wherein flexible scenarios can be built and organized. 
+**dbbenchmark** is a database benchmark-performance comparison tool, wherein flexible scenarios can be built, organized, and simulated to compare performance of multi-database types. 
 
 ## How-to
 
