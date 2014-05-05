@@ -19,6 +19,8 @@ Again, do NOT forget
 ------
 > You will need to create proper database and authorized user in advanced; the default scenario of dbbenchmark is running on MySQL MyISAM and InnoDB, with a database named "testdb", and a user with both username and password as "testdb". -- Please create them before you run the default scenario.
 
+===========
+
 ## Supported Database and/or Database engines in example scenario files (dbbenchmark/scenarios):
 
 *   MySQL/MariaDB (MyISAM, InnoDB, TokuDB)
@@ -47,4 +49,15 @@ Following are tested my.cnf to ensure mysql proper performance (tokudb related s
 	innodb_additional_mem_pool_size = 20M
 	innodb_log_buffer_size = 8M
 	innodb_lock_wait_timeout = 50
+	
+===========
+
+## Source Code Structure
+
+### Trunk.java
+
+The main class to launch the program and invoke other components. Its constructor loads all "Scenarios" from either file or web page input from user, and builds a List of insert threads and a List of query threads for multi-thread pattern simulation execution. 
+
+Its "runScenarios()" method initializes "ScenarioUnitResult" for each "ScenarioUnit", initializes a "IStorageManager" connection, initializes "ScenarioStatementResult" for each "ScenarioStatement" (from a "ScenarioUnit"), sets number of operations per thread, starts all threads for each "ScenarioStatement", waits for all threads' complesion and get the results, and closes the "IStorageManager" connection when all "ScenarioUnit" is finished. 
+
 
