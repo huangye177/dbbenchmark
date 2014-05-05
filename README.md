@@ -52,7 +52,7 @@ Following are tested my.cnf to ensure mysql proper performance (tokudb related s
 	
 ===========
 
-## Source Code Structure
+## Source Code Hint
 
 ### Trunk.java
 
