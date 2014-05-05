@@ -56,8 +56,22 @@ Following are tested my.cnf to ensure mysql proper performance (tokudb related s
 
 ### Trunk.java
 
-The main class to launch the program and invoke other components. Its constructor loads all "Scenarios" from either file or web page input from user, and builds a List of insert threads and a List of query threads for multi-thread pattern simulation execution. 
+This is the main class which launches the program and invokes other components. Its constructor loads all "Scenarios" from either a scenario-configuration file or web page input from user, and builds a List of insert threads and a List of query threads for multi-thread pattern simulation execution. 
 
-Its "runScenarios()" method initializes "ScenarioUnitResult" for each "ScenarioUnit", initializes a "IStorageManager" connection, initializes "ScenarioStatementResult" for each "ScenarioStatement" (from a "ScenarioUnit"), sets number of operations per thread, starts all threads for each "ScenarioStatement", waits for all threads' complesion and get the results, and closes the "IStorageManager" connection when all "ScenarioUnit" is finished. 
+Its "runScenarios()" method initializes "ScenarioUnitResult" for each "ScenarioUnit", initializes a "IStorageManager" connection, initializes "ScenarioStatementResult" for each "ScenarioStatement" (from a "ScenarioUnit"), sets the number of (insert- or query-)operations per thread, starts all threads for each "ScenarioStatement", waits for all threads' completion to get the results, and closes the "IStorageManager" connection when all "ScenarioUnit" is finished. 
 
+## Scenario-*.java
 
+Each time when a simulation is started, it contains a list of "ScenarioUnit" (ScenarioUnit.java), wherein each "ScenarioUnit" has a list of "ScenarioStatement" (ScenarioStatement.java). Each "ScenarioStatement" contains the operatoin type (insert/query/delete), the number of repeat (namely number of insert/query), content of operation (e.g., concerned sql statement), and so on. Further more, to collect the simulation results, such as start time, end time, and execution duration, corresponding result collecting classes, including ScenarioUnitResult.java and ScenarioStatementResult.java, are also supplied.
+
+## StorageCRUDThread.java
+
+A Thread which is inherited by DBInsertThread.java and DBQueryThread.java. "StorageCRUDThread" invokes the "IDataInteroperator" to interoperate given parameters (e.g., operation type, DB type, and statement content) into an object, which can be executed by different children class of "IStorageManager", and invokes the "IStorageManager" to access DB in a propogated thread.
+
+## IDataInteroperator.java
+
+An interroperator to interoperate given statment content (from "ScenarioStatement") into an object, which can be understood by a "IStorageManager" implementations according to other given parameters, such as DB type, operation type, and interoperator type.
+
+## IStorageManager.java
+
+The DB operation abstract class, which can be inherited (such as MongoDBManager.java and MySQLManager.java) to supply CRUD operations to different types of data storage.
